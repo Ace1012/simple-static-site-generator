@@ -1,0 +1,24 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    height: 100vh;
+    width: 100vw;
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    align-items: center;
+  }
+  
+  .dragArea{
+    margin: auto;
+    cursor: pointer;
+    background-color: black;
+    height: 30em;
+    aspect-ratio: 1/1;
+  }
+  
+  
