@@ -6,11 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./styles.css" />
     <script defer type="text/javascript" src="./dist/index.js"></script>
+    <script type="module">
+      // note jsdelivr.net does not automatically minify .mjs
+      import { Base64 } from "https://cdn.jsdelivr.net/npm/js-base64@3.7.4/base64.mjs";
+    </script>
     <title>Home</title>
   </head>
   <body>
+    <nav>
+      <a class="home">home</a>
+      <div class="nav-links">
+        <a href="#">Link 1</a><a href="#">Link 2</a><a href="#">Link 3</a>
+      </div>
+    </nav>
     <h1>Home</h1>
-    <div class="dragArea" title="Drag files here to upload" >Drag and drop files here</div>
+    <div class="dragArea" title="Drag files here to upload">
+      Drag and drop files here
+    </div>
     <iframe></iframe>
   </body>
 </html>

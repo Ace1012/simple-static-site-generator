@@ -1,10 +1,11 @@
-// import * as fs from "fs";
+let markdown = {
+    home: undefined,
+    about: undefined,
+    articles: [],
+    images: [],
+};
 const dragArea = document.querySelector(".dragArea");
 const iframe = document.getElementsByTagName("iframe")[0];
-// const file = fs.readFileSync(`./home/home.html`, "utf8");
-// if (file) {
-//   addLinks();
-// }
 iframe.style.border = "none";
 function preventDefaults(e) {
     e.preventDefault();
@@ -27,11 +28,6 @@ function dragLeave(e) {
 async function drop(e) {
     preventDefaults(e);
     const files = e.dataTransfer.items;
-    let markdown = {
-        home: undefined,
-        about: undefined,
-        articles: [],
-    };
     console.log(files);
     resetStyles();
     let markdownFiles = [];
@@ -71,7 +67,7 @@ function addLinks() {
     document.body.insertBefore(homeLink, iframe);
 }
 //Parse dropped directory into a markdown object
-async function handleEntry(entry, markDown, article) {
+async function handleEntry(entry, markDown, article, image) {
     if (entry.isFile) {
         const file = await getFile(entry);
         let name = file.name.toLowerCase();
@@ -87,19 +83,47 @@ async function handleEntry(entry, markDown, article) {
             case article:
                 markDown.articles.push({ name: file.name, content: await file.text() });
                 break;
+            case image:
+                markDown.images.push(file);
+                break;
             default:
                 alert("Check folder structure");
                 break;
         }
     }
     else if (entry.isDirectory) {
+        console.log("Directory name is: ", entry.name);
         if (entry.name.toLowerCase() === "articles") {
             const articles = await getAllDirectoryEntries(entry);
             for (const article of articles) {
                 handleEntry(article, markDown, true);
             }
         }
+        else if (entry.name.toLowerCase() === "images") {
+            const images = await getAllDirectoryEntries(entry);
+            for (const image of images) {
+                await handleEntry(image, markDown, null, true);
+            }
+            uploadImages();
+        }
     }
+}
+async function uploadImages() {
+    let imageFormData = new FormData();
+    for (const image of markdown.images) {
+        imageFormData.append("images", image);
+    }
+    console.log("Images: ", imageFormData.get("images"));
+    await fetch("http://localhost:3000/images", {
+        method: "POST",
+        body: imageFormData,
+    })
+        .then((res) => {
+        return res.json();
+    })
+        .then((data) => {
+        console.log(data);
+    });
 }
 function getAllDirectoryEntries(directory) {
     const reader = directory.createReader();
@@ -122,4 +146,5 @@ function getFile(fileEntry) {
 dragArea.addEventListener("dragover", dragOver);
 dragArea.addEventListener("dragleave", dragLeave);
 dragArea.addEventListener("drop", drop);
+export {};
 //# sourceMappingURL=index.js.map
