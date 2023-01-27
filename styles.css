@@ -18,7 +18,7 @@ body {
 iframe {
   display: none;
   height: 30em;
-  width: 50%;
+  width: 80%;
 }
 
 nav {
@@ -32,15 +32,35 @@ nav {
   list-style-type: none;
 }
 
-nav.generated{
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  justify-items: center;
-  align-items: center;
-  row-gap: 1em;
+input {
+  padding: 0.5em;
+  border: 1px solid black;
 }
 
-.home{
+ul {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+table {
+  /* width: 80%; */
+  border-collapse: collapse;
+}
+th,
+td {
+  border: 1px solid black;
+  text-align: center;
+  height: 100px;
+  width: 100px;
+  vertical-align: middle;
+}
+th {
+  background-color: lightgrey;
+  /* vertical-align: middle; */
+}
+
+.home {
   cursor: pointer;
   font-size: 2em;
   text-transform: uppercase;
@@ -51,14 +71,16 @@ nav.generated{
   color: #989898;
 }
 
-.nav-links{
+.nav-links {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  justify-items: center;
+  align-items: center;
   gap: 1em;
   width: 50%;
 }
 
-p {
+:not(blockquote) p {
   width: 80%;
   background-color: lightgrey;
   color: black;
@@ -67,13 +89,14 @@ p {
 }
 
 a:not(.home) {
+  display: block;
   text-align: center;
   text-decoration: none;
-  font-size: 1em;
   background-color: #989898;
   color: black;
   padding: 0.3em;
   border-radius: 8px;
+  width: fit-content;
 }
 
 a:not(.home):hover {
@@ -85,15 +108,32 @@ img {
   display: block;
   width: 100%;
   object-fit: contain;
+  transition: all ease-in-out 150ms;
+}
+
+a:has(img){
+  background-color: transparent !important;
+}
+a img{
+  border-radius: var(--border-radius);
+}
+a img:hover{
+  opacity: 0.8;
 }
 
 .dragArea {
   cursor: pointer;
   border: 5px solid black;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 1em;
   height: 30em;
   aspect-ratio: 1/1;
   transition: all ease-in-out 150ms;
+}
+
+.dragArea span {
+  font-size: 1.5em;
 }

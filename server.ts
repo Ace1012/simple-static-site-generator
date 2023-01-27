@@ -4,6 +4,7 @@ import matter from "gray-matter";
 import { marked } from "marked";
 import express from "express";
 import multer from "multer";
+import { JSDOM } from "jsdom";
 
 export interface MarkdownFile {
   name: string;
@@ -14,7 +15,16 @@ export interface Markdown {
   home: MarkdownFile;
   about: MarkdownFile;
   articles?: MarkdownFile[];
+  images?: File[];
 }
+
+interface Article {
+  name: string;
+  outPutFilePath: string;
+  populatedTemplate: string;
+}
+
+type ParsedFile = matter.GrayMatterFile<string> & { html: string };
 
 const storage = multer.diskStorage({
   destination: (req, file, callback) => {
@@ -26,8 +36,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-
-type ParsedFile = matter.GrayMatterFile<string> & { html: string };
+let dom = new JSDOM("<!DOCTYPE html>").window.document;
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
@@ -50,8 +59,8 @@ app.post("/", async (req, res) => {
 
 app.post("/images", upload.array("images", 12), async (req, res) => {
   const images = req.files as Express.Multer.File[];
-  console.log("Images are: ");
-  console.log(images);
+  // console.log("Images are: ");
+  // console.log(images);
 
   for (const image of images) {
     console.log("Image: ", image.filename);
@@ -61,8 +70,11 @@ app.post("/images", upload.array("images", 12), async (req, res) => {
 });
 
 async function createHtml(markdown: Markdown) {
-  const keys = Object.keys(markdown);
-  let articleCounter = 1;
+  let keys = Object.keys(markdown);
+  keys = keys.filter((key) => key !== "articles");
+  keys.splice(0, 0, "articles");
+  let navbarLinks: HTMLDivElement = dom.createElement("div");
+  navbarLinks.className = "nav-links";
 
   for (const key of keys) {
     const outPath = path.join(path.resolve(), `/templates/${key}`);
@@ -73,38 +85,76 @@ async function createHtml(markdown: Markdown) {
             `../templates/${key}/${key === "articles" ? "article" : key}.html`,
             "utf8"
           );
-    if (key !== "articles" && key !== "images") {
-      const outPutFilePath = getOutPutFilePath(key, outPath);
-      const parsedFile = parseFile(markdown[key].content);
-      const populatedTemplate = populateTemplate(template, parsedFile);
-      await saveFile(outPutFilePath, populatedTemplate);
-    }
+    let articles: Article[] = [];
     if (key === "articles") {
       console.log("Parsing articles");
       for (const article of markdown[key]) {
-        const outPutFilePath = getOutPutFilePath(
-          key,
-          outPath,
-          articleCounter++
-        );
-        // console.log(`article${articleCounter}`);
+        const outPutFilePath = getOutPutFilePath(key, outPath, article.name.split(".")[0]);
         const parsedFile = parseFile(article.content);
         const populatedTemplate = populateTemplate(template, parsedFile);
-        await saveFile(outPutFilePath, populatedTemplate);
+        const generatedArticle: Article = {
+          name: article.name.split(".")[0],
+          outPutFilePath: outPutFilePath,
+          populatedTemplate: populatedTemplate,
+        };
+        articles.push(generatedArticle);
+      }
+      createNavLinks(navbarLinks, articles);
+      for (const article of articles) {
+        populateNavBar(
+          article.outPutFilePath,
+          article.populatedTemplate,
+          navbarLinks
+        );
       }
     }
+    if (key === "about" || key === "home") {
+      const outPutFilePath = getOutPutFilePath(key, outPath);
+      const parsedFile = parseFile(markdown[key].content);
+      const populatedTemplate = populateTemplate(template, parsedFile);
+      console.log(populatedTemplate);
+
+      populateNavBar(outPutFilePath, populatedTemplate, navbarLinks);
+    }
   }
+}
+
+async function createNavLinks(
+  navbarLinks: HTMLDivElement,
+  articles: Article[]
+) {
+  for (const article of articles) {
+    let listItem = dom.createElement("li");
+    let articleLink = dom.createElement("a");
+    articleLink.innerHTML = article.name;
+    articleLink.href = `../articles/${article.name}.html`;
+    listItem.appendChild(articleLink);
+    navbarLinks.appendChild(listItem);
+  }
+}
+
+async function populateNavBar<Key extends keyof Markdown>(
+  outPutFilePath: string,
+  populatedTemplate: string,
+  navbarLinks: HTMLDivElement
+) {
+  const html = new JSDOM(populatedTemplate);
+  const doc = html.window.document;
+  doc.body.getElementsByTagName("nav")[0].appendChild(navbarLinks);
+  populatedTemplate = doc.head.outerHTML + doc.body.outerHTML;
+  console.log("Html doc is: \n", populatedTemplate);
+  await saveFile(outPutFilePath, populatedTemplate);
 }
 
 function getOutPutFilePath(
   basename: string,
   outPath: string,
-  articleNumber?: number,
+  articleName?: string,
   imageName?: string
 ) {
   if (imageName) console.log(imageName);
-  const filename = articleNumber
-    ? `article${articleNumber}.html`
+  const filename = articleName
+    ? `${articleName}.html`
     : imageName
     ? `${imageName}`
     : `${basename}.html`;
@@ -115,15 +165,8 @@ function getOutPutFilePath(
 function parseFile(fileContents: string): ParsedFile {
   const parsedFile = matter(fileContents);
   let html = marked(parsedFile.content);
-  // html = sanitizeHTML(html);
   return { ...parsedFile, html };
 }
-
-// function sanitizeHTML(html: string) {
-//   const element = new JSDOM(html).window.document.body;
-//   element.innerText = html;
-//   return element.innerHTML;
-// }
 
 function populateTemplate(template: string, parsedFile: ParsedFile) {
   return template

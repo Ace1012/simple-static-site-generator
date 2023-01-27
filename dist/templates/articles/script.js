@@ -9,5 +9,5 @@ if (currentArticleLink) {
     currentArticleLink.style.backgroundColor = "rosybrown";
     currentArticleLink.style.color = "white";
 }
-// export {};
+export {};
 //# sourceMappingURL=script.js.map

@@ -1,14 +1,4 @@
-interface MarkdownFile {
-  name: string;
-  content: string;
-}
-
-interface Markdown {
-  home: MarkdownFile;
-  about: MarkdownFile;
-  articles: MarkdownFile[];
-  images: File[];
-}
+import { Markdown } from "./server.js";
 
 let markdown: Markdown = {
   home: undefined,
@@ -18,8 +8,12 @@ let markdown: Markdown = {
 };
 
 const dragArea: HTMLDivElement = document.querySelector(".dragArea");
+
 const iframe = document.getElementsByTagName("iframe")[0];
 iframe.style.border = "none";
+
+const input = document.getElementById("file-input") as HTMLInputElement;
+input.addEventListener("change", handleInputSelect);
 
 function preventDefaults(e: Event) {
   e.preventDefault();
@@ -31,11 +25,13 @@ function preventDefaults(e: Event) {
 
 function resetStyles() {
   dragArea.style.backgroundColor = "";
+  dragArea.style.border = "";
 }
 
 function dragOver(e: DragEvent) {
   preventDefaults(e);
-  dragArea.style.backgroundColor = "green";
+  // dragArea.style.backgroundColor = "green";
+  dragArea.style.border = "5px dotted green";
 }
 
 function dragLeave(e: DragEvent) {
@@ -43,23 +39,44 @@ function dragLeave(e: DragEvent) {
   resetStyles();
 }
 
+async function handleInputSelect(this: HTMLInputElement) {
+  for (const file of this.files) {
+    const path = file.webkitRelativePath;
+    switch (true) {
+      case path.includes(`markdown/articles`):
+        populateMarkdown(file, true);
+        break;
+      case path.includes(`markdown/images`):
+        populateMarkdown(file, null, true);
+        break;
+      default:
+        populateMarkdown(file);
+        break;
+    }
+  }
+  uploadImages();
+  sendFiles();
+}
+
 async function drop(e: DragEvent) {
   preventDefaults(e);
-  const files = e.dataTransfer.items;
-
-  console.log(files);
+  parseFiles(e.dataTransfer.items);
   resetStyles();
+}
+
+async function parseFiles(files: DataTransferItemList) {
   let markdownFiles: FileSystemEntry[] = [];
-  for (const mainDirectory of files) {
-    markdownFiles = await getAllDirectoryEntries(
-      mainDirectory.webkitGetAsEntry() as FileSystemDirectoryEntry
-    );
+  for (const file of files) {
+    const mainDirectory = file.webkitGetAsEntry() as FileSystemDirectoryEntry;
+    markdownFiles = await getAllDirectoryEntries(mainDirectory);
   }
   for (const entry of markdownFiles) {
-    await handleEntry(entry, markdown);
+    await handleDroppedEntry(entry);
   }
-  console.log("Markdown: ", markdown);
+  sendFiles();
+}
 
+async function sendFiles() {
   await fetch("http://localhost:3000/", {
     method: "POST",
     body: JSON.stringify({ markdown: markdown }),
@@ -75,6 +92,12 @@ async function drop(e: DragEvent) {
       if (data.parsingStatus === true) {
         addLinks();
       }
+      markdown = {
+        home: undefined,
+        about: undefined,
+        articles: [],
+        images: [],
+      };
     });
 }
 
@@ -85,40 +108,28 @@ function addLinks() {
   dragArea.style.display = "none";
   document.body.appendChild(iframe);
   const homeLink = document.createElement("a");
-  homeLink.innerHTML = "Visit home of site created";
+  homeLink.innerHTML = "Visit site generated";
   homeLink.href = "./dist/templates/home/home.html";
   document.body.insertBefore(homeLink, iframe);
 }
 
 //Parse dropped directory into a markdown object
-async function handleEntry(
+async function handleDroppedEntry(
   entry: FileSystemEntry,
-  markDown: Markdown,
   article?: boolean,
   image?: boolean
 ) {
   if (entry.isFile) {
     const file = await getFile(entry as FileSystemFileEntry);
-    let name = file.name.toLowerCase();
-
-    const home = /home.md/i;
-    const about = /about.md/i;
-
     switch (true) {
-      case home.test(name):
-        markDown.home = { name: file.name, content: await file.text() };
-        break;
-      case about.test(name):
-        markDown.about = { name: file.name, content: await file.text() };
-        break;
       case article:
-        markDown.articles.push({ name: file.name, content: await file.text() });
+        populateMarkdown(file, article);
         break;
       case image:
-        markDown.images.push(file);
+        populateMarkdown(file, null, image);
         break;
       default:
-        alert("Check folder structure");
+        populateMarkdown(file);
         break;
     }
   } else if (entry.isDirectory) {
@@ -128,17 +139,46 @@ async function handleEntry(
         entry as FileSystemDirectoryEntry
       );
       for (const article of articles) {
-        handleEntry(article, markDown, true);
+        handleDroppedEntry(article, true);
       }
     } else if (entry.name.toLowerCase() === "images") {
       const images = await getAllDirectoryEntries(
         entry as FileSystemDirectoryEntry
       );
       for (const image of images) {
-        await handleEntry(image, markDown, null, true);
+        await handleDroppedEntry(image, null, true);
       }
       uploadImages();
     }
+  }
+}
+
+async function populateMarkdown(
+  file: File,
+  article?: boolean,
+  image?: boolean
+) {
+  let name = file.name.toLowerCase();
+
+  const home = /home.md/i;
+  const about = /about.md/i;
+
+  switch (true) {
+    case home.test(name):
+      markdown.home = { name: file.name, content: await file.text() };
+      break;
+    case about.test(name):
+      markdown.about = { name: file.name, content: await file.text() };
+      break;
+    case article:
+      markdown.articles.push({ name: file.name, content: await file.text() });
+      break;
+    case image:
+      markdown.images.push(file);
+      break;
+    default:
+      alert("Check folder structure");
+      break;
   }
 }
 
@@ -149,8 +189,6 @@ async function uploadImages() {
     imageFormData.append("images", image);
   }
 
-  console.log("Images: ", imageFormData.get("images"));
-
   await fetch("http://localhost:3000/images", {
     method: "POST",
     body: imageFormData,
@@ -160,6 +198,9 @@ async function uploadImages() {
     })
     .then((data: { imagesUploaded: boolean }) => {
       console.log(data);
+      if (data.imagesUploaded) {
+        delete markdown.images;
+      }
     });
 }
 
