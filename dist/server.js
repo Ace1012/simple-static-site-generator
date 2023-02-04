@@ -1,10 +1,13 @@
 import * as fs from "fs";
 import * as path from "path";
-import matter from "gray-matter";
-import { marked } from "marked";
 import express from "express";
 import multer from "multer";
+import matter from "gray-matter";
+import { marked } from "marked";
+import sanitizeHtml from "sanitize-html";
 import { JSDOM } from "jsdom";
+import cors from "cors";
+import { randomUUID } from "crypto";
 const storage = multer.diskStorage({
     destination: (req, file, callback) => {
         callback(null, "./templates/images");
@@ -14,36 +17,79 @@ const storage = multer.diskStorage({
     },
 });
 const upload = multer({ storage: storage });
-let dom = new JSDOM("<!DOCTYPE html>").window.document;
+const dom = new JSDOM("<!DOCTYPE html>").window.document;
+const filesToDelete = new Map();
 const app = express();
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use((req, res, next) => {
-    res.setHeader("Access-Control-Allow-Origin", "http://127.0.0.1:5500");
-    res.setHeader("Access-Control-Allow-Headers", "*");
-    next();
+const router = express.Router();
+router.use(express.urlencoded({ extended: true }));
+router.use(express.json());
+router.use(cors({
+    origin: "http://127.0.0.1:5500",
+}));
+router.use(express.static(path.dirname(path.resolve())));
+router.get("/style.css", function (req, res) {
+    console.log("Getting css");
+    res.sendFile("../styles.css");
 });
-console.log("Server running...");
-app.post("/", async (req, res) => {
+router.get("/loadHome", (req, res) => {
+    res.sendFile("home.html", {
+        root: path.join(path.resolve(), "./templates/home"),
+    });
+});
+router.post("/markdown", (req, res) => {
     const markdown = req.body.markdown;
-    console.log();
-    createHtml(markdown);
-    res.send({ parsingStatus: true });
+    let batchId = randomUUID();
+    filesToDelete.set(batchId, []);
+    console.log(batchId);
+    createHtml(markdown, batchId);
+    // deleteFiles(batchId);
+    res.send({ filesSuccessfullyParsed: true });
 });
-app.post("/images", upload.array("images", 12), async (req, res) => {
-    const images = req.files;
-    // console.log("Images are: ");
-    // console.log(images);
-    for (const image of images) {
-        console.log("Image: ", image.filename);
-    }
-    res.send({ imagesUploaded: true });
+router.post("/images", upload.array("images", 12), async (req, res) => {
+    res.send({ imagesSuccessfullyUploaded: true });
 });
-async function createHtml(markdown) {
+router.delete("delete", (req, res) => {
+    res.send({ deleted: true });
+});
+router.use(function (req, res, next) {
+    console.log("Route doesn't exist");
+    console.log(`${{ ...req.query }}`);
+    res.status(404).sendFile("404.html", {
+        root: path.join(path.resolve(), "./templates/error"),
+    });
+});
+app.use("/", router);
+app.listen(3000);
+console.log("Server running...");
+console.log(path.resolve());
+function deleteFiles(batchId) {
+    const files = filesToDelete.get(batchId);
+    const minutes = 30;
+    setTimeout(() => {
+        files.forEach((path) => {
+            console.log(path);
+            fs.unlink(path, (err) => {
+                if (err)
+                    console.log(err);
+                else
+                    console.log("File deleted");
+            });
+        });
+        filesToDelete.delete(batchId);
+    }, minutes * 60 * 1000);
+}
+async function createHtml(markdown, batchId) {
     let keys = Object.keys(markdown);
+    /*
+    Manipulate array contents to have articles as the first key.
+    This is done to account for all the articles first in order to accurately populate the navbar links.
+    */
     keys = keys.filter((key) => key !== "articles");
     keys.splice(0, 0, "articles");
+    let navbarLinksContainer = dom.createElement("div");
+    navbarLinksContainer.className = "nav-links-container";
     let navbarLinks = dom.createElement("div");
+    navbarLinksContainer.appendChild(navbarLinks);
     navbarLinks.className = "nav-links";
     for (const key of keys) {
         const outPath = path.join(path.resolve(), `/templates/${key}`);
@@ -52,7 +98,6 @@ async function createHtml(markdown) {
             : fs.readFileSync(`../templates/${key}/${key === "articles" ? "article" : key}.html`, "utf8");
         let articles = [];
         if (key === "articles") {
-            console.log("Parsing articles");
             for (const article of markdown[key]) {
                 const outPutFilePath = getOutPutFilePath(key, outPath, article.name.split(".")[0]);
                 const parsedFile = parseFile(article.content);
@@ -63,18 +108,25 @@ async function createHtml(markdown) {
                     populatedTemplate: populatedTemplate,
                 };
                 articles.push(generatedArticle);
+                filesToDelete.set(batchId, [
+                    ...filesToDelete.get(batchId),
+                    outPutFilePath,
+                ]);
             }
             createNavLinks(navbarLinks, articles);
             for (const article of articles) {
-                populateNavBar(article.outPutFilePath, article.populatedTemplate, navbarLinks);
+                populateNavBar(article.outPutFilePath, article.populatedTemplate, navbarLinksContainer, markdown, article.name);
             }
         }
         if (key === "about" || key === "home") {
             const outPutFilePath = getOutPutFilePath(key, outPath);
             const parsedFile = parseFile(markdown[key].content);
             const populatedTemplate = populateTemplate(template, parsedFile);
-            console.log(populatedTemplate);
-            populateNavBar(outPutFilePath, populatedTemplate, navbarLinks);
+            filesToDelete.set(batchId, [
+                ...filesToDelete.get(batchId),
+                outPutFilePath,
+            ]);
+            populateNavBar(outPutFilePath, populatedTemplate, navbarLinksContainer, markdown, markdown[key].name);
         }
     }
 }
@@ -83,22 +135,27 @@ async function createNavLinks(navbarLinks, articles) {
         let listItem = dom.createElement("li");
         let articleLink = dom.createElement("a");
         articleLink.innerHTML = article.name;
-        articleLink.href = `../articles/${article.name}.html`;
+        let href = `templates/articles/${article.name}.html`;
+        articleLink.href = `http://127.0.0.1:3000/dist/${href}`;
         listItem.appendChild(articleLink);
         navbarLinks.appendChild(listItem);
     }
 }
-async function populateNavBar(outPutFilePath, populatedTemplate, navbarLinks) {
+async function populateNavBar(outPutFilePath, populatedTemplate, navbarLinksContainer, markdown, filename) {
     const html = new JSDOM(populatedTemplate);
     const doc = html.window.document;
-    doc.body.getElementsByTagName("nav")[0].appendChild(navbarLinks);
+    const nav = doc.body.getElementsByTagName("nav")[0];
+    if (filename !== "about.md" && markdown.about) {
+        const about = doc.createElement("a");
+        about.innerHTML = "About";
+        about.href = "http://127.0.0.1:3000/dist/templates/about/about.html";
+        nav.firstElementChild.appendChild(about);
+    }
+    nav.insertBefore(navbarLinksContainer, nav.lastElementChild);
     populatedTemplate = doc.head.outerHTML + doc.body.outerHTML;
-    console.log("Html doc is: \n", populatedTemplate);
     await saveFile(outPutFilePath, populatedTemplate);
 }
 function getOutPutFilePath(basename, outPath, articleName, imageName) {
-    if (imageName)
-        console.log(imageName);
     const filename = articleName
         ? `${articleName}.html`
         : imageName
@@ -110,6 +167,9 @@ function getOutPutFilePath(basename, outPath, articleName, imageName) {
 function parseFile(fileContents) {
     const parsedFile = matter(fileContents);
     let html = marked(parsedFile.content);
+    html = sanitizeHtml(html, {
+        allowedTags: sanitizeHtml.defaults.allowedTags.concat("img"),
+    });
     return { ...parsedFile, html };
 }
 function populateTemplate(template, parsedFile) {
@@ -119,8 +179,6 @@ function populateTemplate(template, parsedFile) {
 }
 async function saveFile(outPutFilePath, contents) {
     const directory = path.dirname(outPutFilePath);
-    console.log("OutputFilePath: ", outPutFilePath);
-    // console.log("Dir: ", directory);
     if (!fs.existsSync(outPutFilePath)) {
         fs.mkdir(directory, { recursive: true }, (err) => {
             if (err)
@@ -129,5 +187,4 @@ async function saveFile(outPutFilePath, contents) {
     }
     fs.writeFileSync(outPutFilePath, contents);
 }
-app.listen(3000);
 //# sourceMappingURL=server.js.map

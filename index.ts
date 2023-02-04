@@ -1,4 +1,43 @@
-import { Markdown } from "./server.js";
+interface MarkdownFile {
+  name: string;
+  content: string;
+}
+
+interface Markdown {
+  home: MarkdownFile;
+  about: MarkdownFile;
+  articles?: MarkdownFile[];
+  images?: File[];
+}
+
+//Regex of file paths
+const homePathRegex = /^\/?([A-Za-z0-9\-_ ()]+)\/(home.md)$/i;
+const aboutPathRegex = /^\/?([A-Za-z0-9\-_ ()]+)\/(about.md)$/i;
+const articlesPathRegex =
+  /^\/?([A-Za-z0-9\-_ ()]+)\/articles\/([A-Za-z0-9\-_ ()]+.md)$/i;
+const imagesPathRegex =
+  /^\/?([A-Za-z0-9\-_ ()]+)\/images\/([A-Za-z0-9\-_ ()]+.(jpg|jpeg|png|gif))$/i;
+
+const dragArea: HTMLDivElement = document.querySelector(".dragArea");
+const folderStructure = document.getElementsByClassName(
+  "folder-structure"
+)[0] as HTMLElement;
+
+const revealFolderStructure = document.getElementsByClassName(
+  "reveal-folder-structure"
+)[0] as HTMLElement;
+revealFolderStructure.addEventListener("mouseenter", () => {
+  folderStructure.focus();
+});
+revealFolderStructure.addEventListener("mouseleave", () => {
+  folderStructure.blur();
+});
+
+const iframe = document.getElementsByTagName("iframe")[0];
+iframe.style.border = "none";
+
+const input = document.getElementById("file-input") as HTMLInputElement;
+input.addEventListener("change", handleInputSelect);
 
 let markdown: Markdown = {
   home: undefined,
@@ -6,14 +45,6 @@ let markdown: Markdown = {
   articles: [],
   images: [],
 };
-
-const dragArea: HTMLDivElement = document.querySelector(".dragArea");
-
-const iframe = document.getElementsByTagName("iframe")[0];
-iframe.style.border = "none";
-
-const input = document.getElementById("file-input") as HTMLInputElement;
-input.addEventListener("change", handleInputSelect);
 
 function preventDefaults(e: Event) {
   e.preventDefault();
@@ -24,14 +55,14 @@ function preventDefaults(e: Event) {
 }
 
 function resetStyles() {
-  dragArea.style.backgroundColor = "";
+  dragArea.style.boxShadow = "";
   dragArea.style.border = "";
 }
 
 function dragOver(e: DragEvent) {
   preventDefaults(e);
-  // dragArea.style.backgroundColor = "green";
-  dragArea.style.border = "5px dotted green";
+  dragArea.style.boxShadow = "0 0 2em teal";
+  dragArea.style.border = "5px solid teal";
 }
 
 function dragLeave(e: DragEvent) {
@@ -39,121 +70,166 @@ function dragLeave(e: DragEvent) {
   resetStyles();
 }
 
-async function handleInputSelect(this: HTMLInputElement) {
-  for (const file of this.files) {
-    const path = file.webkitRelativePath;
-    switch (true) {
-      case path.includes(`markdown/articles`):
-        populateMarkdown(file, true);
-        break;
-      case path.includes(`markdown/images`):
-        populateMarkdown(file, null, true);
-        break;
-      default:
-        populateMarkdown(file);
-        break;
-    }
-  }
-  uploadImages();
-  sendFiles();
-}
-
 async function drop(e: DragEvent) {
   preventDefaults(e);
-  parseFiles(e.dataTransfer.items);
+  parseDroppedFiles(e.dataTransfer.items);
   resetStyles();
 }
 
-async function parseFiles(files: DataTransferItemList) {
+function errorDetected(message: string) {
+  alert(message);
+  window.location.reload();
+}
+
+async function handleInputSelect(this: HTMLInputElement) {
+  let incorrectFiles: string[] = [];
+  for (const file of this.files) {
+    if (!checkFileValidity(file.webkitRelativePath, file.name)) {
+      incorrectFiles.push(`\nFile name: ${file.name}`);
+      incorrectFiles.push(`\nPath: ${file.webkitRelativePath}\n`);
+    }
+  }
+  if (incorrectFiles.length !== 0) {
+    let alertMessage = incorrectFiles.reduce((message, name) => {
+      return message + `\n${name}`;
+    }, "The following files are incorrectly located/named/are the wrong type: ");
+    errorDetected(alertMessage);
+  }
+  for (const file of this.files) {
+    const path = file.webkitRelativePath;
+    switch (true) {
+      case articlesPathRegex.test(path):
+        await populateMarkdownPayload(file, true);
+        break;
+      case imagesPathRegex.test(path):
+        await populateMarkdownPayload(file, false, true);
+        break;
+      case homePathRegex.test(path):
+      case aboutPathRegex.test(path):
+        await populateMarkdownPayload(file);
+        break;
+    }
+  }
+  if (!markdown.home) {
+    errorDetected("Must include a home.md");
+  }
+  sendFiles();
+}
+
+function checkFileValidity(path: string, name: string) {
+  name = name.toLowerCase();
+  const isValidArticleName = name !== "home.md" && name !== "about.md";
+  switch (true) {
+    case articlesPathRegex.test(path) && isValidArticleName:
+      return true;
+    case imagesPathRegex.test(path):
+      return true;
+    case homePathRegex.test(path):
+    case aboutPathRegex.test(path):
+      return true;
+    default:
+      return false;
+  }
+}
+
+async function parseDroppedFiles(files: DataTransferItemList) {
   let markdownFiles: FileSystemEntry[] = [];
+  let incorrectFiles: string[] = [];
   for (const file of files) {
     const mainDirectory = file.webkitGetAsEntry() as FileSystemDirectoryEntry;
     markdownFiles = await getAllDirectoryEntries(mainDirectory);
   }
   for (const entry of markdownFiles) {
-    await handleDroppedEntry(entry);
+    await handleDroppedEntry(entry, incorrectFiles);
+  }
+  if (incorrectFiles.length !== 0) {
+    let alertMessage = incorrectFiles.reduce((message, name) => {
+      return message + `\n${name}`;
+    }, "The following files are incorrectly located/named/are the wrong type: ");
+    errorDetected(alertMessage);
+  }
+  if (!markdown.home) {
+    errorDetected("Must include a home.md");
   }
   sendFiles();
 }
 
-async function sendFiles() {
-  await fetch("http://localhost:3000/", {
-    method: "POST",
-    body: JSON.stringify({ markdown: markdown }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-    .then((res) => {
-      return res.json();
-    })
-    .then((data: { parsingStatus: boolean }) => {
-      console.log(data);
-      if (data.parsingStatus === true) {
-        addLinks();
-      }
-      markdown = {
-        home: undefined,
-        about: undefined,
-        articles: [],
-        images: [],
-      };
-    });
-}
-
 function addLinks() {
-  iframe.src = "dist/templates/home/home.html";
-  iframe.style.border = "";
-  iframe.style.display = "block";
-  dragArea.style.display = "none";
-  document.body.appendChild(iframe);
-  const homeLink = document.createElement("a");
-  homeLink.innerHTML = "Visit site generated";
-  homeLink.href = "./dist/templates/home/home.html";
-  document.body.insertBefore(homeLink, iframe);
+  const keyframes: Keyframe[] = [
+    {
+      width: "80%",
+      opacity: "0.3",
+    },
+  ];
+  dragArea.animate(keyframes, {
+    duration: 1000,
+    easing: "ease-in-out",
+    iterations: 1,
+  });
+
+  setTimeout(() => {
+    const nav = document.body.getElementsByTagName("nav")[0];
+    iframe.src = "http://127.0.0.1:3000/loadHome";
+    iframe.style.border = "";
+    iframe.style.display = "block";
+    dragArea.style.display = "none";
+    document.body.appendChild(iframe);
+    const homeLink = document.createElement("a");
+    homeLink.innerHTML = "Visit site generated";
+    homeLink.href = "http://127.0.0.1:3000/loadHome";
+    nav.lastElementChild.insertBefore(
+      homeLink,
+      nav.lastElementChild.lastElementChild
+    );
+  }, 1000);
+  folderStructure.style.display = "none";
 }
 
 //Parse dropped directory into a markdown object
 async function handleDroppedEntry(
   entry: FileSystemEntry,
+  incorrectFiles: string[],
   article?: boolean,
   image?: boolean
 ) {
   if (entry.isFile) {
     const file = await getFile(entry as FileSystemFileEntry);
+    if (!checkFileValidity(entry.fullPath, entry.name)) {
+      incorrectFiles.push(`\nFile name => ${file.name}`);
+      incorrectFiles.push(`Path => ${entry.fullPath}\n`);
+      return;
+    }
     switch (true) {
       case article:
-        populateMarkdown(file, article);
+        await populateMarkdownPayload(file, article);
         break;
       case image:
-        populateMarkdown(file, null, image);
+        await populateMarkdownPayload(file, false, image);
         break;
       default:
-        populateMarkdown(file);
+        await populateMarkdownPayload(file);
         break;
     }
   } else if (entry.isDirectory) {
-    console.log("Directory name is: ", entry.name);
     if (entry.name.toLowerCase() === "articles") {
       const articles = await getAllDirectoryEntries(
         entry as FileSystemDirectoryEntry
       );
       for (const article of articles) {
-        handleDroppedEntry(article, true);
+        handleDroppedEntry(article, incorrectFiles, true);
       }
     } else if (entry.name.toLowerCase() === "images") {
       const images = await getAllDirectoryEntries(
         entry as FileSystemDirectoryEntry
       );
       for (const image of images) {
-        await handleDroppedEntry(image, null, true);
+        await handleDroppedEntry(image, incorrectFiles, null, true);
       }
-      uploadImages();
     }
   }
 }
 
-async function populateMarkdown(
+async function populateMarkdownPayload(
   file: File,
   article?: boolean,
   image?: boolean
@@ -176,32 +252,7 @@ async function populateMarkdown(
     case image:
       markdown.images.push(file);
       break;
-    default:
-      alert("Check folder structure");
-      break;
   }
-}
-
-async function uploadImages() {
-  let imageFormData = new FormData();
-
-  for (const image of markdown.images) {
-    imageFormData.append("images", image);
-  }
-
-  await fetch("http://localhost:3000/images", {
-    method: "POST",
-    body: imageFormData,
-  })
-    .then((res) => {
-      return res.json();
-    })
-    .then((data: { imagesUploaded: boolean }) => {
-      console.log(data);
-      if (data.imagesUploaded) {
-        delete markdown.images;
-      }
-    });
 }
 
 function getAllDirectoryEntries(
@@ -224,6 +275,60 @@ function getFile(fileEntry: FileSystemFileEntry): Promise<File> {
   } catch (err) {
     console.log(err);
   }
+}
+
+async function uploadImages() {
+  let imageFormData = new FormData();
+
+  for (const image of markdown.images) {
+    imageFormData.append("images", image);
+  }
+
+  await fetch("http://localhost:3000/images", {
+    method: "POST",
+    body: imageFormData,
+  })
+    .then((res) => {
+      return res.json();
+    })
+    .then((data: { imagesSuccessfullyUploaded: boolean }) => {
+      console.log(data);
+      /*
+      If successfully uploaded, remove from markdown object to
+      avoid redundancy.
+      */
+      if (data.imagesSuccessfullyUploaded) {
+        delete markdown.images;
+      }
+    });
+}
+
+async function sendFiles() {
+  if (!markdown.about) delete markdown.about;
+  console.log(markdown);
+  await uploadImages();
+  await fetch("http://localhost:3000/markdown", {
+    method: "POST",
+    body: JSON.stringify({ markdown: markdown }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((res) => {
+      return res.json();
+    })
+    .then((data: { filesSuccessfullyParsed: boolean }) => {
+      console.log(data);
+      if (data.filesSuccessfullyParsed === true) {
+        addLinks();
+      }
+      markdown = {
+        home: undefined,
+        about: undefined,
+        articles: [],
+        images: [],
+      };
+    });
 }
 
 dragArea.addEventListener("dragover", dragOver);
