@@ -10,7 +10,7 @@ import cors from "cors";
 import { randomUUID } from "crypto";
 const storage = multer.diskStorage({
     destination: (req, file, callback) => {
-        callback(null, "./templates/images");
+        callback(null, "dist/templates/images");
     },
     filename(req, file, callback) {
         callback(null, file.originalname);
@@ -21,19 +21,22 @@ const dom = new JSDOM("<!DOCTYPE html>").window.document;
 const filesToDelete = new Map();
 const app = express();
 const router = express.Router();
+router.use(express.static(path.resolve()));
 router.use(express.urlencoded({ extended: true }));
 router.use(express.json());
 router.use(cors({
-    origin: "http://127.0.0.1:5500",
+    origin: "*",
 }));
-router.use(express.static(path.dirname(path.resolve())));
-router.get("/style.css", function (req, res) {
-    console.log("Getting css");
-    res.sendFile("../styles.css");
+router.get("/", function (req, res) {
+    console.log("Sending index.html");
+    res.set("Access-Control-Allow-Origin", "*");
+    res.sendFile("index.html", {
+        root: path.resolve(),
+    });
 });
 router.get("/loadHome", (req, res) => {
     res.sendFile("home.html", {
-        root: path.join(path.resolve(), "./templates/home"),
+        root: path.join(path.resolve(), "dist/templates/home"),
     });
 });
 router.post("/markdown", (req, res) => {
@@ -48,14 +51,14 @@ router.post("/markdown", (req, res) => {
 router.post("/images", upload.array("images", 12), async (req, res) => {
     res.send({ imagesSuccessfullyUploaded: true });
 });
-router.delete("delete", (req, res) => {
+router.delete("/delete", (req, res) => {
     res.send({ deleted: true });
 });
 router.use(function (req, res, next) {
     console.log("Route doesn't exist");
-    console.log(`${{ ...req.query }}`);
+    // console.log(path.join(path.resolve(), "dist/templates/error"))
     res.status(404).sendFile("404.html", {
-        root: path.join(path.resolve(), "./templates/error"),
+        root: path.join(path.resolve(), "dist/templates/error"),
     });
 });
 app.use("/", router);
@@ -92,10 +95,10 @@ async function createHtml(markdown, batchId) {
     navbarLinksContainer.appendChild(navbarLinks);
     navbarLinks.className = "nav-links";
     for (const key of keys) {
-        const outPath = path.join(path.resolve(), `/templates/${key}`);
+        const outPath = path.join(path.resolve(), `dist/templates/${key}`);
         const template = key === "images"
             ? ""
-            : fs.readFileSync(`../templates/${key}/${key === "articles" ? "article" : key}.html`, "utf8");
+            : fs.readFileSync(path.join(path.resolve(), `templates/${key}/${key === "articles" ? "article" : key}.html`), "utf8");
         let articles = [];
         if (key === "articles") {
             for (const article of markdown[key]) {
@@ -136,7 +139,7 @@ async function createNavLinks(navbarLinks, articles) {
         let articleLink = dom.createElement("a");
         articleLink.innerHTML = article.name;
         let href = `templates/articles/${article.name}.html`;
-        articleLink.href = `http://127.0.0.1:3000/dist/${href}`;
+        articleLink.href = `https://sssg-rapando.onrender.com/dist/${href}`;
         listItem.appendChild(articleLink);
         navbarLinks.appendChild(listItem);
     }
@@ -148,7 +151,7 @@ async function populateNavBar(outPutFilePath, populatedTemplate, navbarLinksCont
     if (filename !== "about.md" && markdown.about) {
         const about = doc.createElement("a");
         about.innerHTML = "About";
-        about.href = "http://127.0.0.1:3000/dist/templates/about/about.html";
+        about.href = "https://sssg-rapando.onrender.com/dist/templates/about/about.html";
         nav.firstElementChild.appendChild(about);
     }
     nav.insertBefore(navbarLinksContainer, nav.lastElementChild);

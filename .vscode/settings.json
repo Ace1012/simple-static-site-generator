@@ -4,7 +4,7 @@
         "**/*.scss",
         "**/*.sass",
         "**/*.ts",
-        "dist/templates/**/*"
+        "dist/**/*"
     ],
     "liveServer.settings.AdvanceCustomBrowserCmdLine": ""
 }

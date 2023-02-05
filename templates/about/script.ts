@@ -64,14 +64,11 @@ if (window.self === window.top) {
 }
 
 if (articleLinks.length > 3) {
-  console.log("Greater than 3");
   articleLinks.forEach((a, index, arr) => {
     if (index === 0) {
-      console.log("Top", a);
       observer.observe(a);
     }
     if (index === arr.length - 1) {
-      console.log("Bottom", a);
       observer.observe(a);
     }
   });
