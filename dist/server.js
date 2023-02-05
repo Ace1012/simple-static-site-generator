@@ -35,15 +35,14 @@ router.get("/", function (req, res) {
     });
 });
 router.get("/loadHome", async (req, res) => {
-    // res.sendFile("home.html", {
-    //   root: path.join(path.resolve(), "dist/templates/home"),
-    // });
-    let array = [];
-    const paths = await getWrittenFiles(path.join(path.resolve()), array);
-    // console.log(paths);
-    res.json({
-        paths: paths,
+    res.sendFile("home.html", {
+        root: path.join(path.resolve(), "dist/templates/home"),
     });
+    // let array: string[] = [];
+    // const paths = await getWrittenFiles(path.join(path.resolve()), array);
+    // res.json({
+    //   paths: paths,
+    // });
 });
 router.post("/markdown", (req, res) => {
     const markdown = req.body.markdown;
