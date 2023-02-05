@@ -6,5 +6,6 @@
     "sourceMap": true,
     "outDir": "dist"
   },
-  "include": ["index.ts", "server.ts", "templates/**/*"]
+  "include": ["templates/**/*"],
+  "files": ["index.ts", "server.ts"]
 }
