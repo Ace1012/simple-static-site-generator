@@ -284,7 +284,7 @@ async function uploadImages() {
     imageFormData.append("images", image);
   }
 
-  await fetch("http://localhost:3000/images", {
+  await fetch("https://sssg-rapando.onrender.com/images", {
     method: "POST",
     body: imageFormData,
   })
@@ -307,7 +307,7 @@ async function sendFiles() {
   if (!markdown.about) delete markdown.about;
   console.log(markdown);
   await uploadImages();
-  await fetch("http://localhost:3000/markdown", {
+  await fetch("https://sssg-rapando.onrender.com/markdown", {
     method: "POST",
     body: JSON.stringify({ markdown: markdown }),
     headers: {
