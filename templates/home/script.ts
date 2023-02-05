@@ -53,7 +53,7 @@ if (window.self === window.top) {
   const backToSite = document.createElement("a");
   backToSite.href = `https://sssg-rapando.onrender.com`;
   backToSite.id = "back-to-site";
-  backToSite.innerText = "Back to site generator";
+  backToSite.innerText = "Back to Site Generator";
   const basicLinks = nav.getElementsByClassName("basic-links")[0];
   basicLinks.insertBefore(backToSite, basicLinks.firstChild);
   // document.body.insertBefore(backToSite, nav);

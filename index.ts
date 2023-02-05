@@ -140,8 +140,7 @@ async function parseDroppedFiles(files: DataTransferItemList) {
 async function validityCheck(incorrectFiles: string[]) {
   if (!markdown.home) {
     errorDetected("Must include a home.md");
-  }
-  if (incorrectFiles.length !== 0) {
+  } else if (incorrectFiles.length !== 0) {
     let alertMessage = incorrectFiles.reduce((message, name) => {
       return message + `\n${name}`;
     }, "The following files are incorrectly located/named/are the wrong type: ");
