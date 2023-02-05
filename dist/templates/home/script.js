@@ -40,7 +40,7 @@ const observer = new IntersectionObserver((entries) => {
 });
 if (window.self === window.top) {
     const backToSite = document.createElement("a");
-    backToSite.href = `http://127.0.0.1:5500`;
+    backToSite.href = `https://sssg-rapando.onrender.com`;
     backToSite.id = "back-to-site";
     backToSite.innerText = "Back to site generator";
     const basicLinks = nav.getElementsByClassName("basic-links")[0];

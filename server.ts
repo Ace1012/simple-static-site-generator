@@ -47,11 +47,7 @@ const router = express.Router();
 router.use(express.static(path.resolve()));
 router.use(express.urlencoded({ extended: true }));
 router.use(express.json());
-router.use(
-  cors({
-    origin: "*",
-  })
-);
+router.use(cors());
 
 router.get("/", function (req, res) {
   console.log("Sending index.html");
@@ -62,15 +58,10 @@ router.get("/", function (req, res) {
 });
 
 router.get("/loadHome", async (req, res) => {
-  console.log("Sending home.html")
+  console.log("Sending home.html");
   res.sendFile("home.html", {
     root: path.join(path.resolve(), "dist/templates/home"),
   });
-  // let array: string[] = [];
-  // const paths = await getWrittenFiles(path.join(path.resolve()), array);
-  // res.json({
-  //   paths: paths,
-  // });
 });
 
 router.post("/markdown", (req, res) => {
@@ -80,7 +71,7 @@ router.post("/markdown", (req, res) => {
   console.log(batchId);
 
   createHtml(markdown, batchId);
-  // getWrittenFiles(path.join(path.resolve(), "dist"))
+
   deleteFiles(batchId);
 
   res.send({ filesSuccessfullyParsed: true });
@@ -103,23 +94,14 @@ router.use(function (req, res, next) {
 app.use("/", router);
 
 app.listen(3000);
-console.log("Server running...");
+console.log("\n\n\nServer running...");
 console.log(path.resolve());
-
-// function getWrittenFiles(){
-//   try {
-//     const arrayOfFiles = fs.readdirSync(path.join(path.resolve(), "dist"))
-//     console.log(arrayOfFiles)
-//   } catch(e) {
-//     console.log(e)
-//   }
-// }
 
 const nmRegex = /node_modules/i;
 const gitRegex = /\.git/i;
 const wrongTemplates = /ssg\\templates/i;
 
-async function getWrittenFiles(dir: string, paths: string[]) {
+async function getAllCurrentFiles(dir: string, paths: string[]) {
   fs.readdirSync(dir).forEach(async (file) => {
     let fullPath = path.join(dir, file);
     if (
@@ -130,11 +112,9 @@ async function getWrittenFiles(dir: string, paths: string[]) {
         wrongTemplates.test(fullPath)
       )
     ) {
-      // console.log("Directory:\t",fullPath);
       paths.push(fullPath);
-      await getWrittenFiles(fullPath, paths);
+      await getAllCurrentFiles(fullPath, paths);
     } else {
-      // console.log("File:\t",fullPath);
       paths.push(fullPath);
     }
   });
@@ -143,9 +123,14 @@ async function getWrittenFiles(dir: string, paths: string[]) {
 
 function deleteFiles(batchId: string) {
   const files = filesToDelete.get(batchId);
-  // const minutes = 0.169;
-  const minutes = 30;
-  setTimeout(() => {
+  const minutes = 0.167;
+  // const minutes = 5;
+  setTimeout(async () => {
+    console.log("\n\n\nCurrent full directory: ");
+    (await getAllCurrentFiles(path.join(path.resolve(), "dist"), [])).forEach(
+      (path) => console.log(path)
+    );
+    console.log("\n\n\nDeleting files...");
     files.forEach((path) => {
       console.log(path);
       fs.unlink(path, (err) => {
@@ -185,7 +170,6 @@ async function createHtml(markdown: Markdown, batchId: string) {
             ),
             "utf8"
           );
-    console.log("Outpath: ", outPath);
     let articles: Article[] = [];
     if (key === "articles") {
       for (const article of markdown[key]) {
@@ -268,8 +252,7 @@ async function populateNavBar(
   if (filename !== "about.md" && markdown.about) {
     const about = doc.createElement("a");
     about.innerHTML = "About";
-    about.href =
-      "https://sssg-rapando.onrender.com/dist/templates/about/about.html";
+    about.href = "https://sssg-rapando.onrender.com/dist/templates/about/about.html";
     nav.firstElementChild.appendChild(about);
   }
 
@@ -310,7 +293,7 @@ function populateTemplate(template: string, parsedFile: ParsedFile) {
 
 async function saveFile(outPutFilePath: string, contents: string) {
   // const directory = path.dirname(outPutFilePath);
-  console.log(outPutFilePath);
+  // console.log(outPutFilePath);
   // if (!fs.existsSync(outPutFilePath)) {
   //   fs.mkdir(directory, { recursive: true }, (err) => {
   //     if (err) throw err;

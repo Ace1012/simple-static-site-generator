@@ -47,7 +47,7 @@ async function drop(e) {
     parseDroppedFiles(e.dataTransfer.items);
     resetStyles();
 }
-function errorDetected(message) {
+async function errorDetected(message) {
     alert(message);
     window.location.reload();
 }
@@ -58,12 +58,6 @@ async function handleInputSelect() {
             incorrectFiles.push(`\nFile name: ${file.name}`);
             incorrectFiles.push(`\nPath: ${file.webkitRelativePath}\n`);
         }
-    }
-    if (incorrectFiles.length !== 0) {
-        let alertMessage = incorrectFiles.reduce((message, name) => {
-            return message + `\n${name}`;
-        }, "The following files are incorrectly located/named/are the wrong type: ");
-        errorDetected(alertMessage);
     }
     for (const file of this.files) {
         const path = file.webkitRelativePath;
@@ -80,10 +74,7 @@ async function handleInputSelect() {
                 break;
         }
     }
-    if (!markdown.home) {
-        errorDetected("Must include a home.md");
-    }
-    sendFiles();
+    validityCheck(incorrectFiles);
 }
 function checkFileValidity(path, name) {
     name = name.toLowerCase();
@@ -110,16 +101,21 @@ async function parseDroppedFiles(files) {
     for (const entry of markdownFiles) {
         await handleDroppedEntry(entry, incorrectFiles);
     }
+    validityCheck(incorrectFiles);
+}
+async function validityCheck(incorrectFiles) {
+    if (!markdown.home) {
+        errorDetected("Must include a home.md");
+    }
     if (incorrectFiles.length !== 0) {
         let alertMessage = incorrectFiles.reduce((message, name) => {
             return message + `\n${name}`;
         }, "The following files are incorrectly located/named/are the wrong type: ");
-        errorDetected(alertMessage);
+        await errorDetected(alertMessage);
     }
-    if (!markdown.home) {
-        errorDetected("Must include a home.md");
+    else {
+        sendFiles();
     }
-    sendFiles();
 }
 function addLinks() {
     const keyframes = [
@@ -221,10 +217,13 @@ function getFile(fileEntry) {
     }
 }
 async function uploadImages() {
+    if (markdown.images.length < 1)
+        return;
     let imageFormData = new FormData();
     for (const image of markdown.images) {
         imageFormData.append("images", image);
     }
+    console.log("Uploading images...");
     await fetch("https://sssg-rapando.onrender.com/images", {
         method: "POST",
         body: imageFormData,
