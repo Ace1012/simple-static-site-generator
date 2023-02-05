@@ -121,7 +121,10 @@ async function getAllCurrentFiles(dir: string, paths: string[]) {
   return paths;
 }
 
-function deleteFiles(batchId: string) {
+async function deleteFiles(batchId: string) {
+  (await getAllCurrentFiles(path.join(path.resolve(), "dist"), [])).forEach(
+    (path) => console.log(path)
+  );
   const files = filesToDelete.get(batchId);
   // const minutes = 0.167;
   const minutes = 30;
@@ -170,6 +173,7 @@ async function createHtml(markdown: Markdown, batchId: string) {
             ),
             "utf8"
           );
+    console.log(outPath);
     let articles: Article[] = [];
     if (key === "articles") {
       for (const article of markdown[key]) {
@@ -252,7 +256,8 @@ async function populateNavBar(
   if (filename !== "about.md" && markdown.about) {
     const about = doc.createElement("a");
     about.innerHTML = "About";
-    about.href = "https://sssg-rapando.onrender.com/dist/templates/about/about.html";
+    about.href =
+      "https://sssg-rapando.onrender.com/dist/templates/about/about.html";
     nav.firstElementChild.appendChild(about);
   }
 
