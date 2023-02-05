@@ -57,13 +57,19 @@ router.get("/", function (req, res) {
   console.log("Sending index.html");
   res.set("Access-Control-Allow-Origin", "*");
   res.sendFile("index.html", {
-    root: path.join(path.resolve(),"public"),
+    root: path.join(path.resolve(), "public"),
   });
 });
 
-router.get("/loadHome", (req, res) => {
-  res.sendFile("home.html", {
-    root: path.join(path.resolve(), "dist/templates/home"),
+router.get("/loadHome", async (req, res) => {
+  // res.sendFile("home.html", {
+  //   root: path.join(path.resolve(), "dist/templates/home"),
+  // });
+  let array: string[] = [];
+  const paths = await getWrittenFiles(path.join(path.resolve(), "dist"), array)
+  console.log(paths)
+  res.json({
+    paths: paths
   });
 });
 
@@ -74,7 +80,7 @@ router.post("/markdown", (req, res) => {
   console.log(batchId);
 
   createHtml(markdown, batchId);
-  getWrittenFiles(path.join(path.resolve(), "dist"))
+  // getWrittenFiles(path.join(path.resolve(), "dist"))
   deleteFiles(batchId);
 
   res.send({ filesSuccessfullyParsed: true });
@@ -109,21 +115,24 @@ console.log(path.resolve());
 //   }
 // }
 
-function getWrittenFiles(dir) {
-  fs.readdirSync(dir).forEach(file => {
+async function getWrittenFiles(dir: string, paths:string[]) {
+  fs.readdirSync(dir).forEach(async (file) => {
     let fullPath = path.join(dir, file);
     if (fs.lstatSync(fullPath).isDirectory()) {
-       console.log(fullPath);
-       getWrittenFiles(fullPath);
-     } else {
-       console.log(fullPath);
-     }  
+      // console.log("Directory:\t",fullPath);
+      paths.push(fullPath);
+      await getWrittenFiles(fullPath, paths);
+    } else {
+      // console.log("File:\t",fullPath);
+      paths.push(fullPath);
+    }
   });
+  return paths;
 }
 
 function deleteFiles(batchId: string) {
   const files = filesToDelete.get(batchId);
-  const minutes = 30;
+  const minutes = 1;
   setTimeout(() => {
     files.forEach((path) => {
       console.log(path);
@@ -247,7 +256,8 @@ async function populateNavBar(
   if (filename !== "about.md" && markdown.about) {
     const about = doc.createElement("a");
     about.innerHTML = "About";
-    about.href = "https://sssg-rapando.onrender.com/dist/templates/about/about.html";
+    about.href =
+      "https://sssg-rapando.onrender.com/dist/templates/about/about.html";
     nav.firstElementChild.appendChild(about);
   }
 
