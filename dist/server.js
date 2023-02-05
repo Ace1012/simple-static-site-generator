@@ -84,8 +84,8 @@ async function getAllCurrentFiles(dir, paths) {
 }
 function deleteFiles(batchId) {
     const files = filesToDelete.get(batchId);
-    const minutes = 0.167;
-    // const minutes = 5;
+    // const minutes = 0.167;
+    const minutes = 30;
     setTimeout(async () => {
         console.log("\n\n\nCurrent full directory: ");
         (await getAllCurrentFiles(path.join(path.resolve(), "dist"), [])).forEach((path) => console.log(path));
