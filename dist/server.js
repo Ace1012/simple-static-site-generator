@@ -35,6 +35,7 @@ router.get("/", function (req, res) {
     });
 });
 router.get("/loadHome", async (req, res) => {
+    console.log("Sending home.html");
     res.sendFile("home.html", {
         root: path.join(path.resolve(), "dist/templates/home"),
     });
@@ -102,7 +103,7 @@ async function getWrittenFiles(dir, paths) {
 function deleteFiles(batchId) {
     const files = filesToDelete.get(batchId);
     // const minutes = 0.169;
-    const minutes = 1;
+    const minutes = 30;
     setTimeout(() => {
         files.forEach((path) => {
             console.log(path);
