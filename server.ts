@@ -67,7 +67,7 @@ router.get("/loadHome", async (req, res) => {
   // });
   let array: string[] = [];
   const paths = await getWrittenFiles(path.join(path.resolve()), array);
-  console.log(paths);
+  // console.log(paths);
   res.json({
     paths: paths,
   });
@@ -146,7 +146,6 @@ function deleteFiles(batchId: string) {
       console.log(path);
       fs.unlink(path, (err) => {
         if (err) console.log(err);
-        else console.log("File deleted");
       });
     });
     filesToDelete.delete(batchId);
@@ -304,11 +303,12 @@ function populateTemplate(template: string, parsedFile: ParsedFile) {
 }
 
 async function saveFile(outPutFilePath: string, contents: string) {
-  const directory = path.dirname(outPutFilePath);
-  if (!fs.existsSync(outPutFilePath)) {
-    fs.mkdir(directory, { recursive: true }, (err) => {
-      if (err) throw err;
-    });
-  }
+  // const directory = path.dirname(outPutFilePath);
+  console.log(outPutFilePath)
+  // if (!fs.existsSync(outPutFilePath)) {
+  //   fs.mkdir(directory, { recursive: true }, (err) => {
+  //     if (err) throw err;
+  //   });
+  // }
   fs.writeFileSync(outPutFilePath, contents);
 }

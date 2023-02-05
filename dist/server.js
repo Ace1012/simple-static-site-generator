@@ -40,7 +40,7 @@ router.get("/loadHome", async (req, res) => {
     // });
     let array = [];
     const paths = await getWrittenFiles(path.join(path.resolve()), array);
-    console.log(paths);
+    // console.log(paths);
     res.json({
         paths: paths,
     });
@@ -108,8 +108,6 @@ function deleteFiles(batchId) {
             fs.unlink(path, (err) => {
                 if (err)
                     console.log(err);
-                else
-                    console.log("File deleted");
             });
         });
         filesToDelete.delete(batchId);
@@ -215,13 +213,13 @@ function populateTemplate(template, parsedFile) {
         .replace(/<!--TITLE-->/i, parsedFile.data.title);
 }
 async function saveFile(outPutFilePath, contents) {
-    const directory = path.dirname(outPutFilePath);
-    if (!fs.existsSync(outPutFilePath)) {
-        fs.mkdir(directory, { recursive: true }, (err) => {
-            if (err)
-                throw err;
-        });
-    }
+    // const directory = path.dirname(outPutFilePath);
+    console.log(outPutFilePath);
+    // if (!fs.existsSync(outPutFilePath)) {
+    //   fs.mkdir(directory, { recursive: true }, (err) => {
+    //     if (err) throw err;
+    //   });
+    // }
     fs.writeFileSync(outPutFilePath, contents);
 }
 //# sourceMappingURL=server.js.map
