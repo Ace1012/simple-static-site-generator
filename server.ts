@@ -57,7 +57,7 @@ router.get("/", function (req, res) {
   console.log("Sending index.html");
   res.set("Access-Control-Allow-Origin", "*");
   res.sendFile("index.html", {
-    root: path.resolve(),
+    root: path.join(path.resolve(),"public"),
   });
 });
 
@@ -74,7 +74,8 @@ router.post("/markdown", (req, res) => {
   console.log(batchId);
 
   createHtml(markdown, batchId);
-  // deleteFiles(batchId);
+  getWrittenFiles(path.join(path.resolve(), "dist"))
+  deleteFiles(batchId);
 
   res.send({ filesSuccessfullyParsed: true });
 });
@@ -88,7 +89,6 @@ router.delete("/delete", (req, res) => {
 });
 router.use(function (req, res, next) {
   console.log("Route doesn't exist");
-  // console.log(path.join(path.resolve(), "dist/templates/error"))
   res.status(404).sendFile("404.html", {
     root: path.join(path.resolve(), "dist/templates/error"),
   });
@@ -99,6 +99,27 @@ app.use("/", router);
 app.listen(3000);
 console.log("Server running...");
 console.log(path.resolve());
+
+// function getWrittenFiles(){
+//   try {
+//     const arrayOfFiles = fs.readdirSync(path.join(path.resolve(), "dist"))
+//     console.log(arrayOfFiles)
+//   } catch(e) {
+//     console.log(e)
+//   }
+// }
+
+function getWrittenFiles(dir) {
+  fs.readdirSync(dir).forEach(file => {
+    let fullPath = path.join(dir, file);
+    if (fs.lstatSync(fullPath).isDirectory()) {
+       console.log(fullPath);
+       getWrittenFiles(fullPath);
+     } else {
+       console.log(fullPath);
+     }  
+  });
+}
 
 function deleteFiles(batchId: string) {
   const files = filesToDelete.get(batchId);
