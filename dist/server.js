@@ -86,7 +86,9 @@ async function getWrittenFiles(dir, paths) {
     fs.readdirSync(dir).forEach(async (file) => {
         let fullPath = path.join(dir, file);
         if (fs.lstatSync(fullPath).isDirectory() &&
-            !(nmRegex.test(fullPath) || gitRegex.test(fullPath) || wrongTemplates.test(fullPath))) {
+            !(nmRegex.test(fullPath) ||
+                gitRegex.test(fullPath) ||
+                wrongTemplates.test(fullPath))) {
             // console.log("Directory:\t",fullPath);
             paths.push(fullPath);
             await getWrittenFiles(fullPath, paths);
@@ -131,6 +133,7 @@ async function createHtml(markdown, batchId) {
         const template = key === "images"
             ? ""
             : fs.readFileSync(path.join(path.resolve(), `templates/${key}/${key === "articles" ? "article" : key}.html`), "utf8");
+        console.log("Outpath: ", outPath);
         let articles = [];
         if (key === "articles") {
             for (const article of markdown[key]) {
@@ -183,7 +186,8 @@ async function populateNavBar(outPutFilePath, populatedTemplate, navbarLinksCont
     if (filename !== "about.md" && markdown.about) {
         const about = doc.createElement("a");
         about.innerHTML = "About";
-        about.href = "https://sssg-rapando.onrender.com/dist/templates/about/about.html";
+        about.href =
+            "https://sssg-rapando.onrender.com/dist/templates/about/about.html";
         nav.firstElementChild.appendChild(about);
     }
     nav.insertBefore(navbarLinksContainer, nav.lastElementChild);

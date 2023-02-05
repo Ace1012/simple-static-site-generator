@@ -117,14 +117,18 @@ console.log(path.resolve());
 
 const nmRegex = /node_modules/i;
 const gitRegex = /\.git/i;
-const wrongTemplates = /ssg\\templates/i
+const wrongTemplates = /ssg\\templates/i;
 
 async function getWrittenFiles(dir: string, paths: string[]) {
   fs.readdirSync(dir).forEach(async (file) => {
     let fullPath = path.join(dir, file);
     if (
       fs.lstatSync(fullPath).isDirectory() &&
-      !(nmRegex.test(fullPath) || gitRegex.test(fullPath) || wrongTemplates.test(fullPath))
+      !(
+        nmRegex.test(fullPath) ||
+        gitRegex.test(fullPath) ||
+        wrongTemplates.test(fullPath)
+      )
     ) {
       // console.log("Directory:\t",fullPath);
       paths.push(fullPath);
@@ -181,6 +185,7 @@ async function createHtml(markdown: Markdown, batchId: string) {
             ),
             "utf8"
           );
+    console.log("Outpath: ", outPath);
     let articles: Article[] = [];
     if (key === "articles") {
       for (const article of markdown[key]) {
@@ -263,7 +268,8 @@ async function populateNavBar(
   if (filename !== "about.md" && markdown.about) {
     const about = doc.createElement("a");
     about.innerHTML = "About";
-    about.href = "https://sssg-rapando.onrender.com/dist/templates/about/about.html";
+    about.href =
+      "https://sssg-rapando.onrender.com/dist/templates/about/about.html";
     nav.firstElementChild.appendChild(about);
   }
 
@@ -304,7 +310,7 @@ function populateTemplate(template: string, parsedFile: ParsedFile) {
 
 async function saveFile(outPutFilePath: string, contents: string) {
   // const directory = path.dirname(outPutFilePath);
-  console.log(outPutFilePath)
+  console.log(outPutFilePath);
   // if (!fs.existsSync(outPutFilePath)) {
   //   fs.mkdir(directory, { recursive: true }, (err) => {
   //     if (err) throw err;
