@@ -66,10 +66,10 @@ router.get("/loadHome", async (req, res) => {
   //   root: path.join(path.resolve(), "dist/templates/home"),
   // });
   let array: string[] = [];
-  const paths = await getWrittenFiles(path.join(path.resolve(), "dist"), array)
-  console.log(paths)
+  const paths = await getWrittenFiles(path.join(path.resolve()), array);
+  console.log(paths);
   res.json({
-    paths: paths
+    paths: paths,
   });
 });
 
@@ -115,10 +115,17 @@ console.log(path.resolve());
 //   }
 // }
 
-async function getWrittenFiles(dir: string, paths:string[]) {
+const nmRegex = /node_modules/i;
+const gitRegex = /\.git/i;
+const wrongTemplates = /ssg\\templates/i
+
+async function getWrittenFiles(dir: string, paths: string[]) {
   fs.readdirSync(dir).forEach(async (file) => {
     let fullPath = path.join(dir, file);
-    if (fs.lstatSync(fullPath).isDirectory()) {
+    if (
+      fs.lstatSync(fullPath).isDirectory() &&
+      !(nmRegex.test(fullPath) || gitRegex.test(fullPath) || wrongTemplates.test(fullPath))
+    ) {
       // console.log("Directory:\t",fullPath);
       paths.push(fullPath);
       await getWrittenFiles(fullPath, paths);
@@ -132,7 +139,7 @@ async function getWrittenFiles(dir: string, paths:string[]) {
 
 function deleteFiles(batchId: string) {
   const files = filesToDelete.get(batchId);
-  const minutes = 1;
+  const minutes = 0.169;
   setTimeout(() => {
     files.forEach((path) => {
       console.log(path);
@@ -236,7 +243,7 @@ async function createNavLinks(
     let articleLink = dom.createElement("a");
     articleLink.innerHTML = article.name;
     let href = `templates/articles/${article.name}.html`;
-    articleLink.href = `https://sssg-rapando.onrender.com/dist/${href}`;
+    articleLink.href = `http://127.0.0.1:3000/dist/${href}`;
     listItem.appendChild(articleLink);
     navbarLinks.appendChild(listItem);
   }
@@ -256,8 +263,7 @@ async function populateNavBar(
   if (filename !== "about.md" && markdown.about) {
     const about = doc.createElement("a");
     about.innerHTML = "About";
-    about.href =
-      "https://sssg-rapando.onrender.com/dist/templates/about/about.html";
+    about.href = "http://127.0.0.1:3000/dist/templates/about/about.html";
     nav.firstElementChild.appendChild(about);
   }
 

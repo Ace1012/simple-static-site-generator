@@ -135,14 +135,14 @@ function addLinks() {
     });
     setTimeout(() => {
         const nav = document.body.getElementsByTagName("nav")[0];
-        iframe.src = "https://sssg-rapando.onrender.com/loadHome";
+        iframe.src = "http://127.0.0.1:3000/loadHome";
         iframe.style.border = "";
         iframe.style.display = "block";
         dragArea.style.display = "none";
         document.body.appendChild(iframe);
         const homeLink = document.createElement("a");
         homeLink.innerHTML = "Visit site generated";
-        homeLink.href = "https://sssg-rapando.onrender.com/loadHome";
+        homeLink.href = "http://127.0.0.1:3000/loadHome";
         nav.lastElementChild.insertBefore(homeLink, nav.lastElementChild.lastElementChild);
     }, 1000);
     folderStructure.style.display = "none";
