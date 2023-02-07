@@ -57,7 +57,7 @@ router.get("/", function (req, res) {
   });
 });
 
-router.get("/loadHome", async (req, res) => {
+router.get("/home", async (req, res) => {
   console.log("Sending home.html");
   res.sendFile("home.html", {
     root: path.join(path.resolve(), "dist/templates/home"),
@@ -74,16 +74,18 @@ router.post("/markdown", (req, res) => {
 
   deleteFiles(batchId);
 
-  res.send({ filesSuccessfullyParsed: true });
+  res.send({ filesSuccessfullyParsed: true, batchId: req.body.batchId });
 });
 
 router.post("/images", upload.array("images", 12), async (req, res) => {
-  res.send({ imagesSuccessfullyUploaded: true });
+  let batchId = randomUUID();
+  res.send({ imagesSuccessfullyUploaded: true, batchId: batchId });
 });
 
 router.delete("/delete", (req, res) => {
   res.send({ deleted: true });
 });
+
 router.use(function (req, res, next) {
   console.log("Route doesn't exist");
   res.status(404).sendFile("404.html", {
@@ -242,6 +244,26 @@ async function createNavLinks(
   }
 }
 
+function createBasicLinks(
+  filename: string,
+  nav: HTMLElement,
+  doc: Document,
+  markdown: Markdown
+) {
+  if (filename !== "home.md") {
+    const home = doc.createElement("a");
+    home.innerHTML = "Home";
+    home.href = `https://sssg-rapando.onrender.com/dist/templates/home/home.html`;
+    nav.firstElementChild.appendChild(home);
+  }
+  if (filename !== "about.md" && markdown.about) {
+    const about = doc.createElement("a");
+    about.innerHTML = "About";
+    about.href = `https://sssg-rapando.onrender.com/dist/templates/about/about.html`;
+    nav.firstElementChild.appendChild(about);
+  }
+}
+
 async function populateNavBar(
   outPutFilePath: string,
   populatedTemplate: string,
@@ -253,16 +275,10 @@ async function populateNavBar(
   const doc = html.window.document;
   const nav = doc.body.getElementsByTagName("nav")[0];
 
-  if (filename !== "about.md" && markdown.about) {
-    const about = doc.createElement("a");
-    about.innerHTML = "About";
-    about.href =
-      "https://sssg-rapando.onrender.com/dist/templates/about/about.html";
-    nav.firstElementChild.appendChild(about);
-  }
+  createBasicLinks(filename, nav, doc, markdown);
 
   nav.insertBefore(navbarLinksContainer, nav.lastElementChild);
-  populatedTemplate = doc.head.outerHTML + doc.body.outerHTML;
+  populatedTemplate = doc.body.parentElement.outerHTML;
   await saveFile(outPutFilePath, populatedTemplate);
 }
 
