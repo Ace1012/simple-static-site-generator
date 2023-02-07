@@ -165,14 +165,14 @@ function addLinks() {
 
   setTimeout(() => {
     const nav = document.body.getElementsByTagName("nav")[0];
-    iframe.src = "https://sssg-rapando.onrender.com/loadHome";
+    iframe.src = "https://sssg-rapando.onrender.com/home";
     iframe.style.border = "";
     iframe.style.display = "block";
     dragArea.style.display = "none";
     document.body.appendChild(iframe);
     const homeLink = document.createElement("a");
     homeLink.innerHTML = "Visit site generated";
-    homeLink.href = "https://sssg-rapando.onrender.com/loadHome";
+    homeLink.href = "https://sssg-rapando.onrender.com/home";
     nav.lastElementChild.insertBefore(
       homeLink,
       nav.lastElementChild.lastElementChild
@@ -273,7 +273,7 @@ function getFile(fileEntry: FileSystemFileEntry): Promise<File> {
   }
 }
 
-async function uploadImages() {
+async function uploadImages(): Promise<number> {
   if (markdown.images.length < 1) return;
   let imageFormData = new FormData();
 
@@ -283,6 +283,8 @@ async function uploadImages() {
 
   console.log("Uploading images...");
 
+  let batchId: number;
+
   await fetch("https://sssg-rapando.onrender.com/images", {
     method: "POST",
     body: imageFormData,
@@ -290,7 +292,7 @@ async function uploadImages() {
     .then((res) => {
       return res.json();
     })
-    .then((data: { imagesSuccessfullyUploaded: boolean }) => {
+    .then((data: { imagesSuccessfullyUploaded: boolean; batchId: number }) => {
       console.log(data);
       /*
       If successfully uploaded, remove from markdown object to
@@ -298,18 +300,22 @@ async function uploadImages() {
       */
       if (data.imagesSuccessfullyUploaded) {
         delete markdown.images;
+        batchId = data.batchId;
+        console.log("Received: ", batchId)
       }
     });
+  return batchId;
 }
 
 async function sendFiles() {
   if (!markdown.about) delete markdown.about;
   console.log(markdown);
-  await uploadImages();
+  let batchId = await uploadImages();
+  console.log("Sending files: ", batchId)
 
   await fetch("https://sssg-rapando.onrender.com/markdown", {
     method: "POST",
-    body: JSON.stringify({ markdown: markdown }),
+    body: JSON.stringify({ markdown: markdown, batchId: batchId }),
     headers: {
       "Content-Type": "application/json",
     },

@@ -32,7 +32,7 @@ router.get("/", function (req, res) {
         root: path.join(path.resolve(), "public"),
     });
 });
-router.get("/loadHome", async (req, res) => {
+router.get("/home", async (req, res) => {
     console.log("Sending home.html");
     res.sendFile("home.html", {
         root: path.join(path.resolve(), "dist/templates/home"),
@@ -45,10 +45,11 @@ router.post("/markdown", (req, res) => {
     console.log(batchId);
     createHtml(markdown, batchId);
     deleteFiles(batchId);
-    res.send({ filesSuccessfullyParsed: true });
+    res.send({ filesSuccessfullyParsed: true, batchId: req.body.batchId });
 });
 router.post("/images", upload.array("images", 12), async (req, res) => {
-    res.send({ imagesSuccessfullyUploaded: true });
+    let batchId = randomUUID();
+    res.send({ imagesSuccessfullyUploaded: true, batchId: batchId });
 });
 router.delete("/delete", (req, res) => {
     res.send({ deleted: true });
@@ -165,19 +166,27 @@ async function createNavLinks(navbarLinks, articles) {
         navbarLinks.appendChild(listItem);
     }
 }
+function createBasicLinks(filename, nav, doc, markdown) {
+    if (filename !== "home.md") {
+        const home = doc.createElement("a");
+        home.innerHTML = "Home";
+        home.href = `https://sssg-rapando.onrender.com/dist/templates/home/home.html`;
+        nav.firstElementChild.appendChild(home);
+    }
+    if (filename !== "about.md" && markdown.about) {
+        const about = doc.createElement("a");
+        about.innerHTML = "About";
+        about.href = `https://sssg-rapando.onrender.com/dist/templates/about/about.html`;
+        nav.firstElementChild.appendChild(about);
+    }
+}
 async function populateNavBar(outPutFilePath, populatedTemplate, navbarLinksContainer, markdown, filename) {
     const html = new JSDOM(populatedTemplate);
     const doc = html.window.document;
     const nav = doc.body.getElementsByTagName("nav")[0];
-    if (filename !== "about.md" && markdown.about) {
-        const about = doc.createElement("a");
-        about.innerHTML = "About";
-        about.href =
-            "https://sssg-rapando.onrender.com/dist/templates/about/about.html";
-        nav.firstElementChild.appendChild(about);
-    }
+    createBasicLinks(filename, nav, doc, markdown);
     nav.insertBefore(navbarLinksContainer, nav.lastElementChild);
-    populatedTemplate = doc.head.outerHTML + doc.body.outerHTML;
+    populatedTemplate = doc.body.parentElement.outerHTML;
     await saveFile(outPutFilePath, populatedTemplate);
 }
 function getOutPutFilePath(basename, outPath, articleName, imageName) {

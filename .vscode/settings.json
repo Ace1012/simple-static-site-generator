@@ -4,7 +4,9 @@
         "**/*.scss",
         "**/*.sass",
         "**/*.ts",
-        "dist/**/*"
+        "dist/**/*",
+        "index.html"
     ],
-    "liveServer.settings.AdvanceCustomBrowserCmdLine": ""
+    "liveServer.settings.AdvanceCustomBrowserCmdLine": "",
+    "liveServer.settings.port": 5500
 }
