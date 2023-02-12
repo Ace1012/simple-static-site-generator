@@ -175,7 +175,7 @@ function addLinks() {
      */
     setTimeout(() => {
         const nav = document.body.getElementsByTagName("nav")[0];
-        iframe.src = "http://127.0.0.1:3000/home";
+        iframe.src = "https://sssg-rapando.netlify.app/home";
         iframe.style.border = "";
         iframeContainer.style.display = "grid";
         dragArea.style.display = "none";
@@ -183,7 +183,7 @@ function addLinks() {
         iframeContainer.insertBefore(downloadButton, iframe);
         const homeLink = document.createElement("a");
         homeLink.innerHTML = "Visit Generated Site";
-        homeLink.href = "http://127.0.0.1:3000/home";
+        homeLink.href = "https://sssg-rapando.netlify.app/home";
         nav.lastElementChild.insertBefore(homeLink, nav.lastElementChild.lastElementChild);
     }, 1000);
     folderStructure.style.display = "none";
@@ -302,7 +302,7 @@ async function uploadImages() {
     }
     console.log("Uploading images...");
     let batchId;
-    await fetch("http://127.0.0.1:3000/images", {
+    await fetch("https://sssg-rapando.netlify.app/images", {
         method: "POST",
         body: imageFormData,
     })
@@ -337,7 +337,7 @@ async function sendFiles() {
     console.log(markdown);
     let batchId = await uploadImages();
     console.log("Sending files: ", batchId);
-    await fetch("http://127.0.0.1:3000/markdown", {
+    await fetch("https://sssg-rapando.netlify.app/markdown", {
         method: "POST",
         body: JSON.stringify({ markdown: markdown, batchId: batchId }),
         headers: {

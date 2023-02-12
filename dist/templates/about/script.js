@@ -10,7 +10,7 @@ downloadButton.addEventListener("click", () => {
 });
 if (window.self === window.top) {
     const backToSite = document.createElement("a");
-    backToSite.href = `http://127.0.0.1:3000`;
+    backToSite.href = `https://sssg-rapando.netlify.app`;
     backToSite.id = "back-to-site";
     backToSite.innerText = "Back to Site Generator";
     const basicLinks = nav.getElementsByClassName("basic-links")[0];

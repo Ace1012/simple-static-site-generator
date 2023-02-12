@@ -245,7 +245,6 @@ app.listen(3000, () => {
  * @param batchId
  */
 async function deleteFiles(batchId) {
-    //Retrieve stored file paths of generated files.
     const files = filesToDelete.get(batchId);
     const minutes = 30;
     console.log(`Deleting in ${minutes} mins`);
