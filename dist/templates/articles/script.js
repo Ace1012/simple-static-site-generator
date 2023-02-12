@@ -1,87 +1,42 @@
 const nav = document.getElementsByTagName("nav")[0];
-const navLinksContainer = document.querySelector(".nav-links-container");
 const pathname = window.location.pathname
     .split("/")
     .pop()
     .split(".")[0]
     .toLowerCase()
     .replace(/%20/g, "");
-const navLinks = nav.getElementsByClassName("nav-links")[0];
-navLinks.addEventListener("mouseenter", triggerMoreArrow);
-const mobileMenuToggler = nav.querySelector(".mobile-nav-links-toggler");
-mobileMenuToggler.addEventListener("click", handleMenuToggler);
-const mobileMenu = nav.querySelector(".mobile-nav-links-menu");
-const closeMenu = mobileMenu.querySelector(".close-menu");
-const menuArticleLinks = mobileMenu.querySelector(".article-links");
+const sideMenuToggler = nav.querySelector(".side-menu-toggler");
+sideMenuToggler.addEventListener("click", handleMenuToggler);
+const sideMenu = nav.querySelector(".side-menu");
+const sideMenuLinks = sideMenu.querySelector(".article-links");
+const closeMenu = sideMenu.querySelector(".close-menu");
 closeMenu.addEventListener("click", handleMenuToggler);
-const articleLinks = Array.from(navLinks.getElementsByTagName("a"));
-articleLinks.forEach((a) => menuArticleLinks.appendChild(a.cloneNode(true)));
-const upArrow = "⬆";
-const downArrow = "⬇";
-let topIntersecting = false;
-let bottomIntersecting = false;
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-        if (entry.target === articleLinks[0]) {
-            if (entry.isIntersecting) {
-                console.log("Top is intersecting");
-                topIntersecting = true;
-                navLinksContainer.dataset.arrow = downArrow;
-            }
-            else {
-                topIntersecting = false;
-            }
-        }
-        else if (entry.target === articleLinks[articleLinks.length - 1]) {
-            if (entry.isIntersecting) {
-                console.log("Bottom is intersecting");
-                bottomIntersecting = true;
-                navLinksContainer.dataset.arrow = upArrow;
-            }
-            else {
-                bottomIntersecting = false;
-            }
-        }
-    });
-    if (!topIntersecting && !bottomIntersecting) {
-        navLinksContainer.dataset.arrow = `${upArrow} ${downArrow}`;
-    }
-    console.log("Stats", { top: topIntersecting, bottom: bottomIntersecting });
+const downloadButton = document.getElementsByClassName("download-link")[0];
+downloadButton.addEventListener("click", () => {
+    alert("To adapt the downloaded site to suit your needs, simply change the url in the base tag of the home.html file.");
 });
-highlightLink(Array.from(menuArticleLinks.children));
-highlightLink(articleLinks);
-if (articleLinks.length > 3) {
-    articleLinks.forEach((a, index, arr) => {
-        if (index === 0) {
-            observer.observe(a);
-        }
-        if (index === arr.length - 1) {
-            observer.observe(a);
-        }
-    });
+if (window.self === window.top) {
+    const backToSite = document.createElement("a");
+    backToSite.href = `http://127.0.0.1:3000`;
+    backToSite.id = "back-to-site";
+    backToSite.innerText = "Back to Site Generator";
+    const basicLinks = nav.getElementsByClassName("basic-links")[0];
+    basicLinks.insertBefore(backToSite, basicLinks.firstElementChild);
 }
+highlightLink(Array.from(sideMenuLinks.getElementsByTagName("a")));
+//Highlight current link
 function highlightLink(links) {
     const currentArticleLink = Array.from(links).find((a) => {
         const name = a.innerHTML.replace(/\s+/g, "").toLowerCase();
         return name === pathname;
     });
     if (currentArticleLink) {
-        currentArticleLink.style.backgroundColor = "rosybrown";
-        currentArticleLink.style.color = "white";
-        currentArticleLink.style.border = "1px solid white";
+        currentArticleLink.id = "current-article-link";
         currentArticleLink.focus();
     }
 }
-function triggerMoreArrow() {
-    if (articleLinks.length > 3) {
-        nav.classList.add("mouse-over");
-        setTimeout(() => {
-            nav.classList.remove("mouse-over");
-        }, 1000);
-    }
-}
 function handleMenuToggler() {
-    mobileMenu.classList.toggle("open");
+    sideMenu.classList.toggle("open");
 }
 export {};
 //# sourceMappingURL=script.js.map

@@ -19,6 +19,10 @@ const imagesPathRegex =
   /^\/?([A-Za-z0-9\-_ ()]+)\/images\/([A-Za-z0-9\-_ ()]+.(jpg|jpeg|png|gif))$/i;
 
 const dragArea: HTMLDivElement = document.querySelector(".dragArea");
+dragArea.addEventListener("dragover", dragOver);
+dragArea.addEventListener("dragleave", dragLeave);
+dragArea.addEventListener("drop", drop);
+
 const folderStructure = document.getElementsByClassName(
   "folder-structure"
 )[0] as HTMLElement;
@@ -33,6 +37,19 @@ revealFolderStructure.addEventListener("mouseleave", () => {
   folderStructure.blur();
 });
 
+const downloadButton = document.getElementsByClassName(
+  "download-link"
+)[0] as HTMLElement;
+
+downloadButton.addEventListener("click", () => {
+  alert(
+    "To adapt the downloaded site to suit your needs, simply change the url in the base tag of the home.html file."
+  );
+});
+
+const iframeContainer = document.getElementsByClassName(
+  "iframe-container"
+)[0] as HTMLElement;
 const iframe = document.getElementsByTagName("iframe")[0];
 iframe.style.border = "none";
 
@@ -76,11 +93,21 @@ async function drop(e: DragEvent) {
   resetStyles();
 }
 
+/**
+ * Display error message and reload page
+ *
+ * @param message
+ */
 async function errorDetected(message: string) {
   alert(message);
   window.location.reload();
 }
 
+/**
+ * Parse webkitdirectory entries and populate the markdown object.
+ *
+ * @param this
+ */
 async function handleInputSelect(this: HTMLInputElement) {
   let incorrectFiles: string[] = [];
   for (const file of this.files) {
@@ -108,6 +135,13 @@ async function handleInputSelect(this: HTMLInputElement) {
   validityCheck(incorrectFiles);
 }
 
+/**
+ * Compare file paths against the regexes to determine validity.
+ *
+ * @param path
+ * @param name
+ * @returns
+ */
 function checkFileValidity(path: string, name: string) {
   name = name.toLowerCase();
   const isValidArticleName = name !== "home.md" && name !== "about.md";
@@ -124,6 +158,11 @@ function checkFileValidity(path: string, name: string) {
   }
 }
 
+/**
+ * Parse the DataTransferItemList entries and populate the markdown object.
+ *
+ * @param files
+ */
 async function parseDroppedFiles(files: DataTransferItemList) {
   let markdownFiles: FileSystemEntry[] = [];
   let incorrectFiles: string[] = [];
@@ -137,6 +176,12 @@ async function parseDroppedFiles(files: DataTransferItemList) {
   validityCheck(incorrectFiles);
 }
 
+/**
+ * Check if folder structure is invalid and either alert user if present
+ * or proceed to sending the files.
+ *
+ * @param incorrectFiles
+ */
 async function validityCheck(incorrectFiles: string[]) {
   if (!markdown.home) {
     errorDetected("Must include a home.md");
@@ -150,6 +195,10 @@ async function validityCheck(incorrectFiles: string[]) {
   }
 }
 
+/**
+ * Animate styles, append new elements
+ * and display previously hidden elements.
+ */
 function addLinks() {
   const keyframes: Keyframe[] = [
     {
@@ -163,21 +212,29 @@ function addLinks() {
     iterations: 1,
   });
 
+  /**
+   * Set timeout to animate styles, append new elements
+   * and display previously hidden elements.
+   */
   setTimeout(() => {
     const nav = document.body.getElementsByTagName("nav")[0];
-    iframe.src = "https://sssg-rapando.onrender.com/home";
+    iframe.src = "https://sssg-rapando.onrender.com//home";
     iframe.style.border = "";
-    iframe.style.display = "block";
+    iframeContainer.style.display = "grid";
     dragArea.style.display = "none";
-    document.body.appendChild(iframe);
+
+    downloadButton.style.display = "block";
+    iframeContainer.insertBefore(downloadButton, iframe);
+
     const homeLink = document.createElement("a");
-    homeLink.innerHTML = "Visit site generated";
-    homeLink.href = "https://sssg-rapando.onrender.com/home";
+    homeLink.innerHTML = "Visit Generated Site";
+    homeLink.href = "https://sssg-rapando.onrender.com//home";
     nav.lastElementChild.insertBefore(
       homeLink,
       nav.lastElementChild.lastElementChild
     );
   }, 1000);
+
   folderStructure.style.display = "none";
 }
 
@@ -225,6 +282,14 @@ async function handleDroppedEntry(
   }
 }
 
+/**
+ * Append the correct file contents to the respective
+ * markdown property.
+ *
+ * @param file
+ * @param article
+ * @param image
+ */
 async function populateMarkdownPayload(
   file: File,
   article?: boolean,
@@ -251,20 +316,39 @@ async function populateMarkdownPayload(
   }
 }
 
+/**
+ * Obtain all the entries within a directory and return
+ * as a Promise<FileSystemArray[]>
+ *
+ * @param directory
+ * @returns
+ */
 function getAllDirectoryEntries(
   directory: FileSystemDirectoryEntry
 ): Promise<FileSystemEntry[]> {
-  const reader = directory.createReader();
-  let directories = readAllDirectoryEntries(reader);
+  const directoryReader = directory.createReader();
+  let directories = readAllDirectoryEntries(directoryReader);
   return directories;
 }
 
-function readAllDirectoryEntries(reader: FileSystemDirectoryReader) {
+/**
+ * Return an array of FileSystemEntries as a Promise
+ *
+ * @param directoryReader
+ * @returns
+ */
+function readAllDirectoryEntries(directoryReader: FileSystemDirectoryReader) {
   return new Promise<FileSystemEntry[]>((resolve, reject) => {
-    reader.readEntries(resolve, reject);
+    directoryReader.readEntries(resolve, reject);
   });
 }
 
+/**
+ * Return a file from a FileSystemFileEntry
+ *
+ * @param fileEntry
+ * @returns
+ */
 function getFile(fileEntry: FileSystemFileEntry): Promise<File> {
   try {
     return new Promise((resolve, reject) => fileEntry.file(resolve, reject));
@@ -273,6 +357,11 @@ function getFile(fileEntry: FileSystemFileEntry): Promise<File> {
   }
 }
 
+/**
+ * Upload any images found within the markdown folder provided
+ *
+ * @returns
+ */
 async function uploadImages(): Promise<number> {
   if (markdown.images.length < 1) return;
   let imageFormData = new FormData();
@@ -285,7 +374,7 @@ async function uploadImages(): Promise<number> {
 
   let batchId: number;
 
-  await fetch("https://sssg-rapando.onrender.com/images", {
+  await fetch("https://sssg-rapando.onrender.com//images", {
     method: "POST",
     body: imageFormData,
   })
@@ -301,19 +390,27 @@ async function uploadImages(): Promise<number> {
       if (data.imagesSuccessfullyUploaded) {
         delete markdown.images;
         batchId = data.batchId;
-        console.log("Received: ", batchId)
+        console.log("Received: ", batchId);
       }
+    })
+    .catch((err) => {
+      console.log(err);
     });
   return batchId;
 }
 
+/**
+ * Call uploadImages() and upload markdown files' contents
+ * afterwards, then trigger post-upload actions by calling
+ * addLinks()
+ */
 async function sendFiles() {
   if (!markdown.about) delete markdown.about;
   console.log(markdown);
   let batchId = await uploadImages();
-  console.log("Sending files: ", batchId)
+  console.log("Sending files: ", batchId);
 
-  await fetch("https://sssg-rapando.onrender.com/markdown", {
+  await fetch("https://sssg-rapando.onrender.com//markdown", {
     method: "POST",
     body: JSON.stringify({ markdown: markdown, batchId: batchId }),
     headers: {
@@ -334,9 +431,8 @@ async function sendFiles() {
         articles: [],
         images: [],
       };
+    })
+    .catch((err) => {
+      console.log(err);
     });
 }
-
-dragArea.addEventListener("dragover", dragOver);
-dragArea.addEventListener("dragleave", dragLeave);
-dragArea.addEventListener("drop", drop);

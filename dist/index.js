@@ -4,6 +4,9 @@ const aboutPathRegex = /^\/?([A-Za-z0-9\-_ ()]+)\/(about.md)$/i;
 const articlesPathRegex = /^\/?([A-Za-z0-9\-_ ()]+)\/articles\/([A-Za-z0-9\-_ ()]+.md)$/i;
 const imagesPathRegex = /^\/?([A-Za-z0-9\-_ ()]+)\/images\/([A-Za-z0-9\-_ ()]+.(jpg|jpeg|png|gif))$/i;
 const dragArea = document.querySelector(".dragArea");
+dragArea.addEventListener("dragover", dragOver);
+dragArea.addEventListener("dragleave", dragLeave);
+dragArea.addEventListener("drop", drop);
 const folderStructure = document.getElementsByClassName("folder-structure")[0];
 const revealFolderStructure = document.getElementsByClassName("reveal-folder-structure")[0];
 revealFolderStructure.addEventListener("mouseenter", () => {
@@ -12,6 +15,11 @@ revealFolderStructure.addEventListener("mouseenter", () => {
 revealFolderStructure.addEventListener("mouseleave", () => {
     folderStructure.blur();
 });
+const downloadButton = document.getElementsByClassName("download-link")[0];
+downloadButton.addEventListener("click", () => {
+    alert("To adapt the downloaded site to suit your needs, simply change the url in the base tag of the home.html file.");
+});
+const iframeContainer = document.getElementsByClassName("iframe-container")[0];
 const iframe = document.getElementsByTagName("iframe")[0];
 iframe.style.border = "none";
 const input = document.getElementById("file-input");
@@ -47,10 +55,20 @@ async function drop(e) {
     parseDroppedFiles(e.dataTransfer.items);
     resetStyles();
 }
+/**
+ * Display error message and reload page
+ *
+ * @param message
+ */
 async function errorDetected(message) {
     alert(message);
     window.location.reload();
 }
+/**
+ * Parse webkitdirectory entries and populate the markdown object.
+ *
+ * @param this
+ */
 async function handleInputSelect() {
     let incorrectFiles = [];
     for (const file of this.files) {
@@ -76,6 +94,13 @@ async function handleInputSelect() {
     }
     validityCheck(incorrectFiles);
 }
+/**
+ * Compare file paths against the regexes to determine validity.
+ *
+ * @param path
+ * @param name
+ * @returns
+ */
 function checkFileValidity(path, name) {
     name = name.toLowerCase();
     const isValidArticleName = name !== "home.md" && name !== "about.md";
@@ -91,6 +116,11 @@ function checkFileValidity(path, name) {
             return false;
     }
 }
+/**
+ * Parse the DataTransferItemList entries and populate the markdown object.
+ *
+ * @param files
+ */
 async function parseDroppedFiles(files) {
     let markdownFiles = [];
     let incorrectFiles = [];
@@ -103,6 +133,12 @@ async function parseDroppedFiles(files) {
     }
     validityCheck(incorrectFiles);
 }
+/**
+ * Check if folder structure is invalid and either alert user if present
+ * or proceed to sending the files.
+ *
+ * @param incorrectFiles
+ */
 async function validityCheck(incorrectFiles) {
     if (!markdown.home) {
         errorDetected("Must include a home.md");
@@ -117,6 +153,10 @@ async function validityCheck(incorrectFiles) {
         sendFiles();
     }
 }
+/**
+ * Animate styles, append new elements
+ * and display previously hidden elements.
+ */
 function addLinks() {
     const keyframes = [
         {
@@ -129,16 +169,21 @@ function addLinks() {
         easing: "ease-in-out",
         iterations: 1,
     });
+    /**
+     * Set timeout to animate styles, append new elements
+     * and display previously hidden elements.
+     */
     setTimeout(() => {
         const nav = document.body.getElementsByTagName("nav")[0];
-        iframe.src = "https://sssg-rapando.onrender.com/home";
+        iframe.src = "http://127.0.0.1:3000/home";
         iframe.style.border = "";
-        iframe.style.display = "block";
+        iframeContainer.style.display = "grid";
         dragArea.style.display = "none";
-        document.body.appendChild(iframe);
+        downloadButton.style.display = "block";
+        iframeContainer.insertBefore(downloadButton, iframe);
         const homeLink = document.createElement("a");
-        homeLink.innerHTML = "Visit site generated";
-        homeLink.href = "https://sssg-rapando.onrender.com/home";
+        homeLink.innerHTML = "Visit Generated Site";
+        homeLink.href = "http://127.0.0.1:3000/home";
         nav.lastElementChild.insertBefore(homeLink, nav.lastElementChild.lastElementChild);
     }, 1000);
     folderStructure.style.display = "none";
@@ -179,6 +224,14 @@ async function handleDroppedEntry(entry, incorrectFiles, article, image) {
         }
     }
 }
+/**
+ * Append the correct file contents to the respective
+ * markdown property.
+ *
+ * @param file
+ * @param article
+ * @param image
+ */
 async function populateMarkdownPayload(file, article, image) {
     let name = file.name.toLowerCase();
     const home = /home.md/i;
@@ -198,16 +251,35 @@ async function populateMarkdownPayload(file, article, image) {
             break;
     }
 }
+/**
+ * Obtain all the entries within a directory and return
+ * as a Promise<FileSystemArray[]>
+ *
+ * @param directory
+ * @returns
+ */
 function getAllDirectoryEntries(directory) {
-    const reader = directory.createReader();
-    let directories = readAllDirectoryEntries(reader);
+    const directoryReader = directory.createReader();
+    let directories = readAllDirectoryEntries(directoryReader);
     return directories;
 }
-function readAllDirectoryEntries(reader) {
+/**
+ * Return an array of FileSystemEntries as a Promise
+ *
+ * @param directoryReader
+ * @returns
+ */
+function readAllDirectoryEntries(directoryReader) {
     return new Promise((resolve, reject) => {
-        reader.readEntries(resolve, reject);
+        directoryReader.readEntries(resolve, reject);
     });
 }
+/**
+ * Return a file from a FileSystemFileEntry
+ *
+ * @param fileEntry
+ * @returns
+ */
 function getFile(fileEntry) {
     try {
         return new Promise((resolve, reject) => fileEntry.file(resolve, reject));
@@ -216,6 +288,11 @@ function getFile(fileEntry) {
         console.log(err);
     }
 }
+/**
+ * Upload any images found within the markdown folder provided
+ *
+ * @returns
+ */
 async function uploadImages() {
     if (markdown.images.length < 1)
         return;
@@ -225,7 +302,7 @@ async function uploadImages() {
     }
     console.log("Uploading images...");
     let batchId;
-    await fetch("https://sssg-rapando.onrender.com/images", {
+    await fetch("http://127.0.0.1:3000/images", {
         method: "POST",
         body: imageFormData,
     })
@@ -243,16 +320,24 @@ async function uploadImages() {
             batchId = data.batchId;
             console.log("Received: ", batchId);
         }
+    })
+        .catch((err) => {
+        console.log(err);
     });
     return batchId;
 }
+/**
+ * Call uploadImages() and upload markdown files' contents
+ * afterwards, then trigger post-upload actions by calling
+ * addLinks()
+ */
 async function sendFiles() {
     if (!markdown.about)
         delete markdown.about;
     console.log(markdown);
     let batchId = await uploadImages();
     console.log("Sending files: ", batchId);
-    await fetch("https://sssg-rapando.onrender.com/markdown", {
+    await fetch("http://127.0.0.1:3000/markdown", {
         method: "POST",
         body: JSON.stringify({ markdown: markdown, batchId: batchId }),
         headers: {
@@ -273,10 +358,10 @@ async function sendFiles() {
             articles: [],
             images: [],
         };
+    })
+        .catch((err) => {
+        console.log(err);
     });
 }
-dragArea.addEventListener("dragover", dragOver);
-dragArea.addEventListener("dragleave", dragLeave);
-dragArea.addEventListener("drop", drop);
 export {};
 //# sourceMappingURL=index.js.map
