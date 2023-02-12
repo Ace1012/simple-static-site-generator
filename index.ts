@@ -218,7 +218,7 @@ function addLinks() {
    */
   setTimeout(() => {
     const nav = document.body.getElementsByTagName("nav")[0];
-    iframe.src = "https://sssg-rapando.onrender.com//home";
+    iframe.src = "https://sssg-rapando.netlify.app/home";
     iframe.style.border = "";
     iframeContainer.style.display = "grid";
     dragArea.style.display = "none";
@@ -228,7 +228,7 @@ function addLinks() {
 
     const homeLink = document.createElement("a");
     homeLink.innerHTML = "Visit Generated Site";
-    homeLink.href = "https://sssg-rapando.onrender.com//home";
+    homeLink.href = "https://sssg-rapando.netlify.app/home";
     nav.lastElementChild.insertBefore(
       homeLink,
       nav.lastElementChild.lastElementChild
@@ -374,7 +374,7 @@ async function uploadImages(): Promise<number> {
 
   let batchId: number;
 
-  await fetch("https://sssg-rapando.onrender.com//images", {
+  await fetch("https://sssg-rapando.netlify.app/images", {
     method: "POST",
     body: imageFormData,
   })
@@ -410,7 +410,7 @@ async function sendFiles() {
   let batchId = await uploadImages();
   console.log("Sending files: ", batchId);
 
-  await fetch("https://sssg-rapando.onrender.com//markdown", {
+  await fetch("https://sssg-rapando.netlify.app/markdown", {
     method: "POST",
     body: JSON.stringify({ markdown: markdown, batchId: batchId }),
     headers: {
