@@ -17,7 +17,7 @@ downloadButton.addEventListener("click", () => {
 });
 if (window.self === window.top) {
     const backToSite = document.createElement("a");
-    backToSite.href = `https://sssg-rapando.netlify.app`;
+    backToSite.href = `https://simple-static-site-generator.vercel.app`;
     backToSite.id = "back-to-site";
     backToSite.innerText = "Back to Site Generator";
     const basicLinks = nav.getElementsByClassName("basic-links")[0];
