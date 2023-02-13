@@ -254,21 +254,20 @@ async function deleteFiles(batchId) {
     const minutes = 30;
     console.log(`Deleting in ${minutes} mins`);
     //Set timeout to delete generated html files.
-    setTimeout(async () => {
-        // console.log("\n\n\nCurrent full directory: ");
-        // (await getAllCurrentFiles(path.join(path.resolve(), "dist"), [])).forEach(
-        //   (path) => console.log(path)
-        // );
-        console.log("\n\n\nDeleting files...");
-        files.forEach((path) => {
-            console.log(path);
-            fs.unlink(path, (err) => {
-                if (err)
-                    console.log(err);
-            });
-        });
-        filesToDelete.delete(batchId);
-    }, 30 * 60 * 1000);
+    // setTimeout(async () => {
+    //   // console.log("\n\n\nCurrent full directory: ");
+    //   // (await getAllCurrentFiles(path.join(path.resolve(), "dist"), [])).forEach(
+    //   //   (path) => console.log(path)
+    //   // );
+    //   console.log("\n\n\nDeleting files...");
+    //   files.forEach((path) => {
+    //     console.log(path);
+    //     fs.unlink(path, (err) => {
+    //       if (err) console.log(err);
+    //     });
+    //   });
+    //   filesToDelete.delete(batchId);
+    // }, 30 * 60 * 1000);
 }
 /**
  * Parse markdown, generate and save the resultant html files.
@@ -300,7 +299,7 @@ async function createHtml(markdown, batchId) {
         const template = key === "images"
             ? ""
             : fs.readFileSync(path.join(path.resolve(), `templates/${key}/${key === "articles" ? "article" : key}.html`), "utf8");
-        console.log(outPath);
+        // console.log(outPath);
         let articles = [];
         if (key === "articles") {
             for (const article of markdown[key]) {
