@@ -1,12 +1,7 @@
 {
   "version": 2,
+  "routes": [{ "src": "/(.*)", "status": 404, "dest": "dist/templates/error/404.html" }],
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api"
-    }
-  ],
-  "routes": [
     {
       "source": "/(.*)",
       "destination": "/"
