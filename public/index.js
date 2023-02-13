@@ -306,7 +306,7 @@ async function uploadImages() {
         console.log("Sending image...", key);
         await fetch("https://sssg-rapando.vercel.app/images", {
             method: "POST",
-            body: imageFormData,
+            body: image,
         })
             .then((res) => {
             return res.json();
