@@ -1,5 +1,22 @@
 {
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "builds": [
+    {
+      "src": "dist/server.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "dist/server.js"
+    }
+  ],
   "redirects": [
     {
       "source": "/(.*)",
