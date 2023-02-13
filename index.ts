@@ -374,33 +374,28 @@ async function uploadImages(): Promise<number> {
 
   let batchId: number;
 
-  imageFormData.forEach(async (image, key) => {
-    console.log("Sending image...", key);
-    await fetch("https://sssg-rapando.onrender.com/images", {
-      method: "POST",
-      body: image,
+  await fetch("https://sssg-rapando.onrender.com/images", {
+    method: "POST",
+    body: imageFormData,
+  })
+    .then((res) => {
+      return res.json();
     })
-      .then((res) => {
-        return res.json();
-      })
-      .then(
-        (data: { imagesSuccessfullyUploaded: boolean; batchId: number }) => {
-          console.log(data);
-          /*
+    .then((data: { imagesSuccessfullyUploaded: boolean; batchId: number }) => {
+      console.log(data);
+      /*
       If successfully uploaded, remove from markdown object to
       avoid redundancy.
       */
-          if (data.imagesSuccessfullyUploaded) {
-            // delete markdown.images;
-            // batchId = data.batchId;
-            console.log("Received: ", batchId);
-          }
-        }
-      )
-      .catch((err) => {
-        console.log(err);
-      });
-  });
+      if (data.imagesSuccessfullyUploaded) {
+        // delete markdown.images;
+        // batchId = data.batchId;
+        console.log("Received: ", batchId);
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
   delete markdown.images;
   return batchId;
 }
