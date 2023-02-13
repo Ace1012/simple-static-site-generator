@@ -2,8 +2,8 @@
   "version": 2,
   "rewrites": [
     {
-      "source": "/styles.css",
-      "destination": "public/styles.css"
+      "source": "/(.*)",
+      "destination": "/"
     }
   ],
   "redirects": [
