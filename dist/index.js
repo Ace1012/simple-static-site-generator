@@ -302,28 +302,32 @@ async function uploadImages() {
     }
     console.log("Uploading images...");
     let batchId;
-    await fetch("https://sssg-rapando.vercel.app/images", {
-        method: "POST",
-        body: imageFormData,
-    })
-        .then((res) => {
-        return res.json();
-    })
-        .then((data) => {
-        console.log(data);
-        /*
+    imageFormData.forEach(async (image, key) => {
+        console.log("Sending image...", key);
+        await fetch("https://sssg-rapando.vercel.app/images", {
+            method: "POST",
+            body: imageFormData,
+        })
+            .then((res) => {
+            return res.json();
+        })
+            .then((data) => {
+            console.log(data);
+            /*
         If successfully uploaded, remove from markdown object to
         avoid redundancy.
         */
-        if (data.imagesSuccessfullyUploaded) {
-            delete markdown.images;
-            batchId = data.batchId;
-            console.log("Received: ", batchId);
-        }
-    })
-        .catch((err) => {
-        console.log(err);
+            if (data.imagesSuccessfullyUploaded) {
+                // delete markdown.images;
+                // batchId = data.batchId;
+                console.log("Received: ", batchId);
+            }
+        })
+            .catch((err) => {
+            console.log(err);
+        });
     });
+    delete markdown.images;
     return batchId;
 }
 /**
@@ -335,11 +339,14 @@ async function sendFiles() {
     if (!markdown.about)
         delete markdown.about;
     console.log(markdown);
-    let batchId = await uploadImages();
-    console.log("Sending files: ", batchId);
+    await uploadImages();
+    // console.log("Sending files: ", batchId);
     await fetch("https://sssg-rapando.vercel.app/markdown", {
         method: "POST",
-        body: JSON.stringify({ markdown: markdown, batchId: batchId }),
+        body: JSON.stringify({
+            markdown: markdown,
+            // batchId: batchId,
+        }),
         headers: {
             "Content-Type": "application/json",
         },

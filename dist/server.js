@@ -57,14 +57,19 @@ router.post("/markdown", (req, res) => {
     console.log(batchId);
     createHtml(markdown, batchId);
     deleteFiles(batchId);
-    res.send({ filesSuccessfullyParsed: true, batchId: req.body.batchId });
+    // res.send({ filesSuccessfullyParsed: true, batchId: req.body.batchId });
+    res.send({ filesSuccessfullyParsed: true, batchId: batchId });
 });
 /**
  * Receive images stored in images directory.
  */
 router.post("/images", upload.array("images", 12), async (req, res) => {
-    let batchId = randomUUID();
-    res.send({ imagesSuccessfullyUploaded: true, batchId: batchId });
+    // let batchId = req.body.batchId ? req.body.batchId : randomUUID();
+    // let batchId = randomUUID();
+    res.send({
+        imagesSuccessfullyUploaded: true,
+        // batchId: batchId,
+    });
 });
 /**
  * Create a zip file containing the generated html files.
