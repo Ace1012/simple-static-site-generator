@@ -292,7 +292,7 @@ router.get("/download", async (req, res) => {
         recursive: true,
         force: true,
       });
-    }, 100);
+    }, 1000);
   }
 });
 
