@@ -98,11 +98,10 @@ router.post("/images", upload.array("images", 12), async (req, res) => {
   res.send({ imagesSuccessfullyUploaded: true, batchId: batchId });
 });
 
-
 /**
  * Create a zip file containing the generated html files.
- * 
- * NB: 
+ *
+ * NB:
  * - The "Download Site" option in the side menu is removed here.
  * - TODO: If the files were already deleted, then an error message is sent instead requesting
  *         regeneration.
@@ -333,11 +332,10 @@ app.listen(3000, () => {
 //   return paths;
 // }
 
-
 /**
  * Used to manage storage by deleting generated files after a set time.
- * 
- * @param batchId 
+ *
+ * @param batchId
  */
 async function deleteFiles(batchId: string) {
   const files = filesToDelete.get(batchId);
@@ -363,9 +361,9 @@ async function deleteFiles(batchId: string) {
 
 /**
  * Parse markdown, generate and save the resultant html files.
- * 
- * @param markdown 
- * @param batchId 
+ *
+ * @param markdown
+ * @param batchId
  */
 async function createHtml(markdown: Markdown, batchId: string) {
   let keys = Object.keys(markdown) as (keyof Markdown)[];
@@ -523,12 +521,12 @@ function createBasicLinks(
 /**
  * Properly append the generated navbar & sidebar content onto the
  * generated html files.
- * 
- * @param outPutFilePath 
- * @param populatedTemplate 
- * @param sidebarLinks 
- * @param markdown 
- * @param filename 
+ *
+ * @param outPutFilePath
+ * @param populatedTemplate
+ * @param sidebarLinks
+ * @param markdown
+ * @param filename
  */
 async function populateNavBar(
   outPutFilePath: string,
@@ -554,12 +552,12 @@ async function populateNavBar(
 
 /**
  * Generate output file path
- * 
- * @param basename 
- * @param outPath 
- * @param articleName 
- * @param imageName 
- * @returns 
+ *
+ * @param basename
+ * @param outPath
+ * @param articleName
+ * @param imageName
+ * @returns
  */
 function getOutPutFilePath(
   basename: string,
@@ -580,9 +578,9 @@ function getOutPutFilePath(
  * Obtain the front-matter of the markdown file, parse the markdown file into
  * html, sanitize the generated html and return an object containing the front-matter, old markdown
  * and generated html.
- * 
- * @param fileContents 
- * @returns 
+ *
+ * @param fileContents
+ * @returns
  */
 function parseFile(fileContents: string): ParsedFile {
   const parsedFile = matter(fileContents);
@@ -594,13 +592,13 @@ function parseFile(fileContents: string): ParsedFile {
 }
 
 /**
- * Populate the html templates by replacing the content comment with the 
+ * Populate the html templates by replacing the content comment with the
  * generated html and using the front-matter replace any other comment that
  * may be included in future.
- * 
- * @param template 
- * @param parsedFile 
- * @returns 
+ *
+ * @param template
+ * @param parsedFile
+ * @returns
  */
 function populateTemplate(template: string, parsedFile: ParsedFile) {
   return template
@@ -610,10 +608,12 @@ function populateTemplate(template: string, parsedFile: ParsedFile) {
 
 /**
  * Create the file by writing it onto the file system.
- * 
- * @param outPutFilePath 
- * @param contents 
+ *
+ * @param outPutFilePath
+ * @param contents
  */
 async function saveFile(outPutFilePath: string, contents: string) {
   fs.writeFileSync(outPutFilePath, contents);
 }
+
+module.exports = app;
