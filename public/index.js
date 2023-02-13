@@ -175,7 +175,7 @@ function addLinks() {
      */
     setTimeout(() => {
         const nav = document.body.getElementsByTagName("nav")[0];
-        iframe.src = "https://sssg-rapando.vercel.app/home";
+        iframe.src = "https://sssg-rapando.onrender.com/home";
         iframe.style.border = "";
         iframeContainer.style.display = "grid";
         dragArea.style.display = "none";
@@ -183,7 +183,7 @@ function addLinks() {
         iframeContainer.insertBefore(downloadButton, iframe);
         const homeLink = document.createElement("a");
         homeLink.innerHTML = "Visit Generated Site";
-        homeLink.href = "https://sssg-rapando.vercel.app/home";
+        homeLink.href = "https://sssg-rapando.onrender.com/home";
         nav.lastElementChild.insertBefore(homeLink, nav.lastElementChild.lastElementChild);
     }, 1000);
     folderStructure.style.display = "none";
@@ -304,7 +304,7 @@ async function uploadImages() {
     let batchId;
     imageFormData.forEach(async (image, key) => {
         console.log("Sending image...", key);
-        await fetch("https://sssg-rapando.vercel.app/images", {
+        await fetch("https://sssg-rapando.onrender.com/images", {
             method: "POST",
             body: image,
         })
@@ -341,7 +341,7 @@ async function sendFiles() {
     console.log(markdown);
     await uploadImages();
     // console.log("Sending files: ", batchId);
-    await fetch("https://sssg-rapando.vercel.app/markdown", {
+    await fetch("https://sssg-rapando.onrender.com/markdown", {
         method: "POST",
         body: JSON.stringify({
             markdown: markdown,
