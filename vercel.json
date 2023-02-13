@@ -1,27 +1,14 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
   "builds": [
     {
       "src": "dist/server.js",
       "use": "@vercel/node"
-    },
-    {
-      "src": "*.html",
-      "use": "@vercel/static"
     }
   ],
-  "rewrites": [
+  "routes": [
     {
-      "source": "/(.*)",
-      "destination": "dist/server.js"
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "statusCode": 404,
-      "destination": "dist/templates/error/404.html"
+      "src": "/(.*)",
+      "dest": "dist/server.js"
     }
   ]
 }

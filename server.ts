@@ -287,7 +287,7 @@ router.get("/download", async (req, res) => {
         recursive: true,
         force: true,
       });
-    }, 1000);
+    }, 100);
   }
 });
 
@@ -615,5 +615,3 @@ function populateTemplate(template: string, parsedFile: ParsedFile) {
 async function saveFile(outPutFilePath: string, contents: string) {
   fs.writeFileSync(outPutFilePath, contents);
 }
-
-module.exports = app;

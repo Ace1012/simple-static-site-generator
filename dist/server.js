@@ -199,7 +199,7 @@ router.get("/download", async (req, res) => {
                 recursive: true,
                 force: true,
             });
-        }, 1000);
+        }, 100);
     }
 });
 /**
