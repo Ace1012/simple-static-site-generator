@@ -1,13 +1,15 @@
 {
   "version": 2,
-  "routes": [
+  "rewrites": [
+    {
+      "source": "/styles.css",
+      "destination": "public/styles.css"
+    }
+  ],
+  "redirects": [
     {
       "source": "/(.*)",
-      "destination": "/"
-    },
-    {
-      "source": "/(.*)",
-      "status": 404,
+      "statusCode": 404,
       "destination": "dist/templates/error/404.html"
     }
   ]
