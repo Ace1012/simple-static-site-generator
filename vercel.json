@@ -1,10 +1,14 @@
 {
   "version": 2,
-  "routes": [{ "src": "/(.*)", "status": 404, "dest": "dist/templates/error/404.html" }],
   "rewrites": [
     {
       "source": "/(.*)",
       "destination": "/"
+    },
+    {
+      "src": "/(.*)",
+      "status": 404,
+      "dest": "dist/templates/error/404.html"
     }
   ]
 }
