@@ -6,12 +6,5 @@
       "source": "/(.*)",
       "destination": "/"
     }
-  ],
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "statusCode": 404,
-      "destination": "dist/templates/error/404.html"
-    }
   ]
 }
