@@ -6,9 +6,9 @@
       "destination": "/"
     },
     {
-      "src": "/(.*)",
+      "source": "/(.*)",
       "status": 404,
-      "dest": "dist/templates/error/404.html"
+      "destination": "dist/templates/error/404.html"
     }
   ]
 }
