@@ -165,7 +165,7 @@ router.get("/download", async (req, res) => {
   };
 
   const keys = Object.keys(dummyObject) as (keyof WebsiteFolder)[];
-  const root = `/tmp/dist/templates/`;
+  const root = `dist/templates/`;
 
   //Read contents of styles..css file
   const styles = fs.readFileSync(
@@ -328,10 +328,10 @@ app.listen(3000, () => {
   };
   let keys = Object.keys(tmp) as (keyof Markdown)[];
 
-  fs.mkdirSync(path.join(path.resolve(), "/tmp/dist/templates"));
+  fs.mkdirSync(path.join(path.resolve(), "dist/templates"));
 
   keys.forEach((key) => {
-    fs.mkdirSync(path.join(path.resolve(), `/tmp/dist/templates/${key}`));
+    fs.mkdirSync(path.join(path.resolve(), `dist/templates/${key}`));
   });
   console.log("\n\n\nServer running...");
   console.log(path.resolve());
@@ -419,7 +419,7 @@ async function createHtml(markdown: Markdown, batchId: string) {
   let homeSidebarLinks: HTMLAnchorElement[] = [];
 
   for (const key of keys) {
-    const outPath = path.join(path.resolve(), `/tmp/dist/templates/${key}`);
+    const outPath = path.join(path.resolve(), `dist/templates/${key}`);
     const template =
       key === "images"
         ? ""
