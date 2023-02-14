@@ -217,33 +217,31 @@ router.use(function (req, res, next) {
     });
 });
 app.use("/", router);
-app.listen(3000, () => {
+app.listen(3000, async () => {
     console.log("\n\n\nServer running...");
+    (await getAllCurrentFiles(path.join(path.resolve()), [])).forEach((path) => console.log(path));
     console.log(path.resolve());
 });
-// const nmRegex = /node_modules/i;
-// const gitRegex = /\.git/i;
-// const wrongTemplates = /ssg\\templates/i;
+const nmRegex = /node_modules/i;
+const gitRegex = /\.git/i;
+const wrongTemplates = /ssg\\templates/i;
 //Return the file paths of all files in root directory
-// async function getAllCurrentFiles(dir: string, paths: string[]) {
-//   fs.readdirSync(dir).forEach(async (file) => {
-//     let fullPath = path.join(dir, file);
-//     if (
-//       fs.lstatSync(fullPath).isDirectory() &&
-//       !(
-//         nmRegex.test(fullPath) ||
-//         gitRegex.test(fullPath) ||
-//         wrongTemplates.test(fullPath)
-//       )
-//     ) {
-//       paths.push(fullPath);
-//       await getAllCurrentFiles(fullPath, paths);
-//     } else {
-//       paths.push(fullPath);
-//     }
-//   });
-//   return paths;
-// }
+async function getAllCurrentFiles(dir, paths) {
+    fs.readdirSync(dir).forEach(async (file) => {
+        let fullPath = path.join(dir, file);
+        if (fs.lstatSync(fullPath).isDirectory() &&
+            !(nmRegex.test(fullPath) ||
+                gitRegex.test(fullPath) ||
+                wrongTemplates.test(fullPath))) {
+            paths.push(fullPath);
+            await getAllCurrentFiles(fullPath, paths);
+        }
+        else {
+            paths.push(fullPath);
+        }
+    });
+    return paths;
+}
 /**
  * Used to manage storage by deleting generated files after a set time.
  *
@@ -256,9 +254,7 @@ async function deleteFiles(batchId) {
     //Set timeout to delete generated html files.
     setTimeout(async () => {
         // console.log("\n\n\nCurrent full directory: ");
-        // (await getAllCurrentFiles(path.join(path.resolve(), "dist"), [])).forEach(
-        //   (path) => console.log(path)
-        // );
+        (await getAllCurrentFiles(path.join(path.resolve(), "dist"), [])).forEach((path) => console.log(path));
         console.log("\n\n\nDeleting files...");
         files.forEach((path) => {
             console.log(path);

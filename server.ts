@@ -308,8 +308,11 @@ router.use(function (req, res, next) {
 
 app.use("/", router);
 
-app.listen(3000, () => {
+app.listen(3000, async () => {
   console.log("\n\n\nServer running...");
+  (await getAllCurrentFiles(path.join(path.resolve()), [])).forEach(
+    (path) => console.log(path)
+  );
   console.log(path.resolve());
 });
 
