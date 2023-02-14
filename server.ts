@@ -398,7 +398,7 @@ async function createHtml(markdown: Markdown, batchId: string) {
   let homeSidebarLinks: HTMLAnchorElement[] = [];
 
   for (const key of keys) {
-    const outPath = path.join(path.resolve(), `dist/templates/${key}`);
+    const outPath = path.join(path.resolve(), `/tmp/dist/templates/${key}`);
     const template =
       key === "images"
         ? ""
@@ -409,7 +409,7 @@ async function createHtml(markdown: Markdown, batchId: string) {
             ),
             "utf8"
           );
-    console.log(outPath);
+    // console.log(outPath);
     let articles: Article[] = [];
     if (key === "articles") {
       for (const article of markdown[key]) {

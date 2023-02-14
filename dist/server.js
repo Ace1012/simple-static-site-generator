@@ -292,11 +292,11 @@ async function createHtml(markdown, batchId) {
      */
     let homeSidebarLinks = [];
     for (const key of keys) {
-        const outPath = path.join(path.resolve(), `dist/templates/${key}`);
+        const outPath = path.join(path.resolve(), `/tmp/dist/templates/${key}`);
         const template = key === "images"
             ? ""
             : fs.readFileSync(path.join(path.resolve(), `templates/${key}/${key === "articles" ? "article" : key}.html`), "utf8");
-        console.log(outPath);
+        // console.log(outPath);
         let articles = [];
         if (key === "articles") {
             for (const article of markdown[key]) {
