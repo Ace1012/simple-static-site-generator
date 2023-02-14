@@ -157,7 +157,7 @@ router.get("/download", async (req, res) => {
   };
 
   const keys = Object.keys(dummyObject) as (keyof WebsiteFolder)[];
-  const root = `dist/templates/`;
+  const root = `/tmp/dist/templates/`;
 
   //Read contents of styles..css file
   const styles = fs.readFileSync(
@@ -312,6 +312,19 @@ router.use(function (req, res, next) {
 app.use("/", router);
 
 app.listen(3000, () => {
+  let tmp: Required<Markdown> = {
+    home: undefined,
+    about: undefined,
+    articles: [],
+    images: [],
+  };
+  let keys = Object.keys(tmp) as (keyof Markdown)[];
+
+  fs.mkdirSync(path.join(path.resolve(), "/tmp/dist/templates"));
+
+  keys.forEach((key) => {
+    fs.mkdirSync(path.join(path.resolve(), `/tmp/dist/templates/${key}`));
+  });
   console.log("\n\n\nServer running...");
   console.log(path.resolve());
 });

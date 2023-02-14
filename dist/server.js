@@ -107,7 +107,7 @@ router.get("/download", async (req, res) => {
         images: undefined,
     };
     const keys = Object.keys(dummyObject);
-    const root = `dist/templates/`;
+    const root = `/tmp/dist/templates/`;
     //Read contents of styles..css file
     const styles = fs.readFileSync(path.join(path.resolve(), `public/styles.css`));
     publicFolder.file("styles.css", styles);
@@ -219,6 +219,17 @@ router.use(function (req, res, next) {
 });
 app.use("/", router);
 app.listen(3000, () => {
+    let tmp = {
+        home: undefined,
+        about: undefined,
+        articles: [],
+        images: [],
+    };
+    let keys = Object.keys(tmp);
+    fs.mkdirSync(path.join(path.resolve(), "/tmp/dist/templates"));
+    keys.forEach((key) => {
+        fs.mkdirSync(path.join(path.resolve(), `/tmp/dist/templates/${key}`));
+    });
     console.log("\n\n\nServer running...");
     console.log(path.resolve());
 });
