@@ -59,9 +59,9 @@ router.use(cors());
  */
 router.get("/", async (req, res) => {
   console.log("Sending index.html");
-  (await getAllCurrentFiles(path.join(path.resolve()), [])).forEach((path) =>
-    console.log(path)
-  );
+  // (await getAllCurrentFiles(path.join(path.resolve()), [])).forEach((path) =>
+  //   console.log(path)
+  // );
   res.sendFile("index.html", {
     root: path.join(path.resolve(), "public"),
   });
@@ -106,6 +106,13 @@ router.post("/images", upload.array("images", 12), async (req, res) => {
   });
 });
 
+router.get('/fileStructure', async (req, res) => {
+  (await getAllCurrentFiles(path.join(path.resolve()), [])).forEach((path) =>
+    console.log(path)
+  );
+  res.json({message: "Check vercel logs"})
+})
+
 /**
  * Create a zip file containing the generated html files.
  *
@@ -116,9 +123,6 @@ router.post("/images", upload.array("images", 12), async (req, res) => {
  */
 router.get("/download", async (req, res) => {
   console.log("Before creating zip....");
-  (await getAllCurrentFiles(path.join(path.resolve()), [])).forEach((path) =>
-    console.log(path)
-  );
   console.log("Sending zip file");
 
   const zip = new JSZip();
@@ -370,9 +374,9 @@ async function deleteFiles(batchId: string) {
   //Set timeout to delete generated html files.
   setTimeout(async () => {
     // console.log("\n\n\nCurrent full directory: ");
-    (await getAllCurrentFiles(path.join(path.resolve(), "dist"), [])).forEach(
-      (path) => console.log(path)
-    );
+    // (await getAllCurrentFiles(path.join(path.resolve(), "dist"), [])).forEach(
+    //   (path) => console.log(path)
+    // );
     console.log("\n\n\nDeleting files...");
     files.forEach((path) => {
       console.log(path);
