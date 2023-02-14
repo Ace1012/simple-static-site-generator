@@ -302,27 +302,29 @@ async function uploadImages() {
     }
     console.log("Uploading images...");
     let batchId;
-    await fetch("https://sssg-rapando.vercel.app/images", {
-        method: "POST",
-        body: imageFormData,
-    })
-        .then((res) => {
-        return res.json();
-    })
-        .then((data) => {
-        console.log(data);
-        /*
+    imageFormData.forEach(async (image) => {
+        await fetch("https://sssg-rapando.vercel.app/images", {
+            method: "POST",
+            body: image,
+        })
+            .then((res) => {
+            return res.json();
+        })
+            .then((data) => {
+            console.log(data);
+            /*
         If successfully uploaded, remove from markdown object to
         avoid redundancy.
         */
-        if (data.imagesSuccessfullyUploaded) {
-            // delete markdown.images;
-            // batchId = data.batchId;
-            console.log("Received: ", batchId);
-        }
-    })
-        .catch((err) => {
-        console.log(err);
+            if (data.imagesSuccessfullyUploaded) {
+                // delete markdown.images;
+                // batchId = data.batchId;
+                console.log("Received: ", batchId);
+            }
+        })
+            .catch((err) => {
+            console.log(err);
+        });
     });
     delete markdown.images;
     return batchId;

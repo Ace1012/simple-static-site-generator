@@ -374,28 +374,33 @@ async function uploadImages(): Promise<number> {
 
   let batchId: number;
 
-  await fetch("https://sssg-rapando.vercel.app/images", {
-    method: "POST",
-    body: imageFormData,
-  })
-    .then((res) => {
-      return res.json();
+  imageFormData.forEach(async (image) => {
+    await fetch("https://sssg-rapando.vercel.app/images", {
+      method: "POST",
+      body: image,
     })
-    .then((data: { imagesSuccessfullyUploaded: boolean; batchId: number }) => {
-      console.log(data);
-      /*
+      .then((res) => {
+        return res.json();
+      })
+      .then(
+        (data: { imagesSuccessfullyUploaded: boolean; batchId: number }) => {
+          console.log(data);
+          /*
       If successfully uploaded, remove from markdown object to
       avoid redundancy.
       */
-      if (data.imagesSuccessfullyUploaded) {
-        // delete markdown.images;
-        // batchId = data.batchId;
-        console.log("Received: ", batchId);
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+          if (data.imagesSuccessfullyUploaded) {
+            // delete markdown.images;
+            // batchId = data.batchId;
+            console.log("Received: ", batchId);
+          }
+        }
+      )
+      .catch((err) => {
+        console.log(err);
+      });
+  });
+
   delete markdown.images;
   return batchId;
 }
