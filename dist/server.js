@@ -32,8 +32,9 @@ router.use(cors());
 /**
  * Send index.html
  */
-router.get("/", function (req, res) {
+router.get("/", async (req, res) => {
     console.log("Sending index.html");
+    (await getAllCurrentFiles(path.join(path.resolve()), [])).forEach((path) => console.log(path));
     res.sendFile("index.html", {
         root: path.join(path.resolve(), "public"),
     });
@@ -217,9 +218,8 @@ router.use(function (req, res, next) {
     });
 });
 app.use("/", router);
-app.listen(3000, async () => {
+app.listen(3000, () => {
     console.log("\n\n\nServer running...");
-    (await getAllCurrentFiles(path.join(path.resolve()), [])).forEach((path) => console.log(path));
     console.log(path.resolve());
 });
 const nmRegex = /node_modules/i;
