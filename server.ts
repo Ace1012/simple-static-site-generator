@@ -104,6 +104,16 @@ router.post("/images", upload.array("images", 12), async (req, res) => {
 });
 
 /**
+ * Output file structure of render build
+ */
+router.get("/fileStructure", async (req, res) => {
+  (await getAllCurrentFiles(path.join(path.resolve()), [])).forEach((path) =>
+    console.log(path)
+  );
+  res.json({ message: "Check render logs" });
+});
+
+/**
  * Create a zip file containing the generated html files.
  *
  * NB:
@@ -313,29 +323,35 @@ app.listen(3000, () => {
   console.log(path.resolve());
 });
 
-// const nmRegex = /node_modules/i;
-// const gitRegex = /\.git/i;
-// const wrongTemplates = /ssg\\templates/i;
-//Return the file paths of all files in root directory
-// async function getAllCurrentFiles(dir: string, paths: string[]) {
-//   fs.readdirSync(dir).forEach(async (file) => {
-//     let fullPath = path.join(dir, file);
-//     if (
-//       fs.lstatSync(fullPath).isDirectory() &&
-//       !(
-//         nmRegex.test(fullPath) ||
-//         gitRegex.test(fullPath) ||
-//         wrongTemplates.test(fullPath)
-//       )
-//     ) {
-//       paths.push(fullPath);
-//       await getAllCurrentFiles(fullPath, paths);
-//     } else {
-//       paths.push(fullPath);
-//     }
-//   });
-//   return paths;
-// }
+/**
+ * Return the file paths of all files in root directory
+ *
+ * @param dir
+ * @param paths
+ * @returns
+ */
+async function getAllCurrentFiles(dir: string, paths: string[]) {
+  const nmRegex = /node_modules/i;
+  const gitRegex = /\.git/i;
+  const wrongTemplates = /ssg\\templates/i;
+  fs.readdirSync(dir).forEach(async (file) => {
+    let fullPath = path.join(dir, file);
+    if (
+      fs.lstatSync(fullPath).isDirectory() &&
+      !(
+        nmRegex.test(fullPath) ||
+        gitRegex.test(fullPath) ||
+        wrongTemplates.test(fullPath)
+      )
+    ) {
+      paths.push(fullPath);
+      await getAllCurrentFiles(fullPath, paths);
+    } else {
+      paths.push(fullPath);
+    }
+  });
+  return paths;
+}
 
 /**
  * Used to manage storage by deleting generated files after a set time.
