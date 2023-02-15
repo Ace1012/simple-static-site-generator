@@ -175,7 +175,7 @@ function addLinks() {
      */
     setTimeout(() => {
         const nav = document.body.getElementsByTagName("nav")[0];
-        iframe.src = "https://sssg-rapando.onrender.com/home";
+        iframe.src = "http://127.0.0.1:3000/home";
         iframe.style.border = "";
         iframeContainer.style.display = "grid";
         dragArea.style.display = "none";
@@ -183,7 +183,7 @@ function addLinks() {
         iframeContainer.insertBefore(downloadButton, iframe);
         const homeLink = document.createElement("a");
         homeLink.innerHTML = "Visit Generated Site";
-        homeLink.href = "https://sssg-rapando.onrender.com/home";
+        homeLink.href = "http://127.0.0.1:3000/home";
         nav.lastElementChild.insertBefore(homeLink, nav.lastElementChild.lastElementChild);
     }, 1000);
     folderStructure.style.display = "none";
@@ -302,7 +302,7 @@ async function uploadImages() {
     }
     console.log("Uploading images...");
     let batchId;
-    await fetch("https://sssg-rapando.onrender.com/images", {
+    await fetch("http://127.0.0.1:3000/images", {
         method: "POST",
         body: imageFormData,
     })
@@ -338,7 +338,7 @@ async function sendFiles() {
     console.log(markdown);
     await uploadImages();
     // console.log("Sending files: ", batchId);
-    await fetch("https://sssg-rapando.onrender.com/markdown", {
+    await fetch("http://127.0.0.1:3000/markdown", {
         method: "POST",
         body: JSON.stringify({
             markdown: markdown,
