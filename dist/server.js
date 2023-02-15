@@ -63,7 +63,12 @@ router.post("/markdown", (req, res) => {
 /**
  * Receive images stored in images directory.
  */
-router.post("/images", upload.array("images", 12), async (req, res) => {
+router.post("/images", () => {
+    const imagesPath = path.join(path.resolve(), `dist/templates/images`);
+    if (fs.existsSync(imagesPath)) {
+        fs.mkdirSync(imagesPath);
+    }
+}, upload.array("images", 12), async (req, res) => {
     // let batchId = req.body.batchId ? req.body.batchId : randomUUID();
     // let batchId = randomUUID();
     res.send({
@@ -221,29 +226,12 @@ app.listen(3000, () => {
     console.log("\n\n\nServer running...");
     console.log(path.resolve());
 });
-// const nmRegex = /node_modules/i;
-// const gitRegex = /\.git/i;
-// const wrongTemplates = /ssg\\templates/i;
-//Return the file paths of all files in root directory
-// async function getAllCurrentFiles(dir: string, paths: string[]) {
-//   fs.readdirSync(dir).forEach(async (file) => {
-//     let fullPath = path.join(dir, file);
-//     if (
-//       fs.lstatSync(fullPath).isDirectory() &&
-//       !(
-//         nmRegex.test(fullPath) ||
-//         gitRegex.test(fullPath) ||
-//         wrongTemplates.test(fullPath)
-//       )
-//     ) {
-//       paths.push(fullPath);
-//       await getAllCurrentFiles(fullPath, paths);
-//     } else {
-//       paths.push(fullPath);
-//     }
-//   });
-//   return paths;
-// }
+function createImagesFolder() {
+    const imagesPath = path.join(path.resolve(), `dist/templates/images`);
+    if (fs.existsSync(imagesPath)) {
+        fs.mkdirSync(imagesPath);
+    }
+}
 /**
  * Used to manage storage by deleting generated files after a set time.
  *
