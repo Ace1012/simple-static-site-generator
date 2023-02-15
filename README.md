@@ -337,9 +337,9 @@ npm run start
 ```
 In browser:
 ```
-http://localhost:{port}
+http://localhost:3000
         or 
-http://127.0.0.1:{port}
+http://127.0.0.1:3000
 ```
 ## References/Credits
 
