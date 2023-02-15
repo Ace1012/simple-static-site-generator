@@ -7,8 +7,6 @@ The frontend uses basic ```html```, ```css``` and ```javascript(typescript)``` w
 
 ## Table of Contents:
 
-
-
 - [Description](#description "Brief description")
 - [How to Use](#how-to-use "Details on how to use the site") :
   - [Dragging and Dropping](#1-dragging-and-dropping "Selecting folder from the file explorer via dragging and dropping")
@@ -28,8 +26,8 @@ The frontend uses basic ```html```, ```css``` and ```javascript(typescript)``` w
   - [JSDOM](#5-jsdom "More on JSDOM usage")
   - [Sanitize-HTML](#6-sanitize-html "More on Sanitize-HTML usage")
   - [JSZIP](#7-jszip "More on JSZIP usage")
-- [Limitations](#setting-up "Steps to follow to setup project locally")
-- [Possible Improvements](#setting-up "Steps to follow to setup project locally")
+- [Limitations](#limitations "Steps to follow to setup project locally")
+- [Possible Improvements](#possible-improvements "Steps to follow to setup project locally")
 - [Installation](#installation-instructions "Installation instructions")
 - [Usage](#usage "Usage")
 - [References/Credits](#referencescredits "Credits")
@@ -44,11 +42,7 @@ This simple tool is used to create a website that supports a homepage, any numbe
 
 ## How to use
 
-
-
-<br>
-
-![Static Site generator Home](./ssg-home.png "Simple Static Site Generator Home Page")
+![Static Site generator Home](https://user-images.githubusercontent.com/26191715/219008500-fa00ed5d-eb70-4eaf-9fa5-0f8eefa3c32b.png "Simple Static Site Generator Home Page")
 The site requires a structured folder ([see here](#folder-structure "More on folder structure")) with the relevant markdown files to generate the site. The files can be supplied either by:
 
 1. Dragging and dropping the files
@@ -60,11 +54,11 @@ The site requires a structured folder ([see here](#folder-structure "More on fol
 
 **The folder containing the relevant files can be dragged and dropped in the designated area to complete the process.**
 
-![Drag-1](./ssg-drag1.png "Drag folder from explorer window")
+![Drag-1](https://user-images.githubusercontent.com/26191715/219009208-41af0ac7-28cf-40e2-aec4-21ed7366459c.png "Drag folder from explorer window")
 
 **When you drag over the relevant area, the border turns green indicating it is droppable.**
 
-![Drag-2](./ssg-drag2.png "On drag-over, the droppable-area's border turns teal")
+![Drag-2](https://user-images.githubusercontent.com/26191715/219009387-7ea5702a-97de-4f78-ba2f-63eab503e988.png "On drag-over, the droppable-area's border turns teal")
 
 <br>
 
@@ -76,11 +70,11 @@ Another option available is to simply select from your file explorer by clicking
 
 After clicking `Choose File`, select the relevant directory from file explorer window.
 
-![Input-1](./ssg-explorer1.png "Select the relevant parent folder housing all your files from the file explorer")
+![Input-1](https://user-images.githubusercontent.com/26191715/219009577-5b8186a5-728a-4172-9780-748c5d1477f8.png "Select the relevant parent folder housing all your files from the file explorer")
 
 A confirmation prompt will display the number of files selected
 
-![Input-2](./ssg-explorer2.png "A confirmation prompt is triggered showing number of files selected")
+![Input-2](https://user-images.githubusercontent.com/26191715/219009584-cbcf8582-f426-488f-a342-e2fa3afd2149.png "A confirmation prompt is triggered showing number of files selected")
 
 To note: Only folders can be selected. Any files that are dragged and dropped will be rejected
 
@@ -92,28 +86,28 @@ To note: Only folders can be selected. Any files that are dragged and dropped wi
 
 If the folder structure is not valid, a prompt will display all the issues via a message containing the files that failed the validity check as well as their locations.
 
-![Unsuccessful](./unsuccessful.png "Unsuccessful")
+![Unsuccessful](https://user-images.githubusercontent.com/26191715/219009632-0993c480-aa44-47f7-be88-37c6e485ae18.png "Unsuccessful")
 
 ### Successful Generation
 
 
 
 If the folder adheres to the folder structure specifications, the site will be generated and can be previewed within an `iframe`.
-![Successful](./successful.png "Successful")
+![Successful](https://user-images.githubusercontent.com/26191715/219009626-64f1c591-a9ee-48b4-96f8-b2dd35911624.png "Successful")
 
 After site generation, a new link will be appended on the navbar before the documentation link. Clicking this will take you to the home page of your site.
 
-![Visit Site Generated](./visit-site-generated.png "Visit Site Generated")
+![Visit Site Generated](https://user-images.githubusercontent.com/26191715/219009652-1a06e1be-523d-470b-868d-7ee39e6b263b.png "Visit Site Generated")
 
 Example site:
-!["Example site"](./example-site.png "Example site")
+!["Example site"](https://user-images.githubusercontent.com/26191715/219009815-38f8722e-374d-4f38-aa53-5ea5685a6620.png "Example site")
 
 The generated site can also be downloaded.
-!["Download site1"](./download-site1.png "Download site")
-!["Download site2"](./download-site2.png "Download site from generated site menu")
+!["Download site1"](https://user-images.githubusercontent.com/26191715/219009778-91b95883-0c35-482f-a4ae-bfa9e8bce02f.png "Download site")
+!["Download site2"](https://user-images.githubusercontent.com/26191715/219009785-55eb37c5-1ecc-4de4-9bff-1edd5ddb2ee7.png "Download site from generated site menu")
 
-!["Download site3"](./download-site3.png "Message notifiying user how to make use of site files")
-!["Download site4"](./download-site4.png "saving website.zip")
+!["Download site3"](https://user-images.githubusercontent.com/26191715/219009796-4876523f-a2e3-4cb5-af9f-d18c7ad19bdb.png "Message notifiying user how to make use of site files")
+!["Download site4"](https://user-images.githubusercontent.com/26191715/219009804-6bb08ed4-2b4e-4ec6-a959-9d39ded7896a.png "saving website.zip")
 <br>
 <br>
 
@@ -123,7 +117,7 @@ The generated site can also be downloaded.
 
 The folder provided should be organized in the following way:
 
-![File Structure](./SSG-Folder-Structure.jpg "File Structure")
+![File Structure](https://user-images.githubusercontent.com/26191715/219009858-eb16ba1f-3839-401d-915e-27f5bbd6415e.jpg "File Structure")
 
 The main directory can have **ANY** name.
 
@@ -315,7 +309,7 @@ More about JSZIP can be found [here](https://www.npmjs.com/package/jszip "JSZIP 
 
 So far the files generated, as well as images, are stored locally on the file system. This leads to a few problems:
 
-1. Due to storing files on the file server, the amount of storage available is limited. A file server/bucket or database for persistence. This is somewhat alleviated by the short life-span of the generated files but is bad for scalability.
+1. Due to storing files on the file server, the amount of storage available is limited. This is somewhat alleviated by the short life-span of the generated files but is bad for scalability.
 
 1. When the server is restarted, any generated files that may have been stored are lost.
 
@@ -341,6 +335,12 @@ npm install
 ```
 npm run start
 ```
+In browser:
+```
+http://localhost:{port}
+        or 
+http://127.0.0.1:{port}
+```
 ## References/Credits
 
-- Project's foundation was an inspiration from [Joel Codes](https://youtu.be/NPgg3rpZ_RU "Make your own custom STATIC SITE GENERATOR with NodeJS | JavaScript").
+- Project's foundation was inspired by [Joel Codes](https://youtu.be/NPgg3rpZ_RU "Make your own custom STATIC SITE GENERATOR with NodeJS | JavaScript").
