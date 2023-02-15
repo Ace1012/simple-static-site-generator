@@ -292,7 +292,7 @@ More about JSDOM can be found [here](https://www.npmjs.com/package/jsdom "JSDOM 
 
 Sanitize-HTML is, as its name suggests, a simple HTML sanitizer.
 
-It was used to ensure no malicious code ends up being parsed. It was also chosen because of its robust customization options.
+It was used to ensure no malicious/poorly formatted code ends up being parsed. It was also chosen because of its robust customization options.
 
 More about sanitize-html can be found [here](https://www.npmjs.com/package/sanitize-html "Sanitize-html documentaion")
 
