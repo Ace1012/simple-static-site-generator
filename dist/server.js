@@ -63,13 +63,7 @@ router.post("/markdown", (req, res) => {
 /**
  * Receive images stored in images directory.
  */
-router.post("/images", () => {
-    const imagesPath = path.join(path.resolve(), `dist/templates/images`);
-    if (fs.existsSync(imagesPath)) {
-        fs.mkdirSync(imagesPath);
-    }
-}, upload.array("images", 12), async (req, res) => {
-    // let batchId = req.body.batchId ? req.body.batchId : randomUUID();
+router.post("/images", upload.array("images", 12), async (req, res) => {
     // let batchId = randomUUID();
     res.send({
         imagesSuccessfullyUploaded: true,
@@ -222,16 +216,18 @@ router.use(function (req, res, next) {
     });
 });
 app.use("/", router);
-app.listen(3000, () => {
-    console.log("\n\n\nServer running...");
-    console.log(path.resolve());
-});
 function createImagesFolder() {
     const imagesPath = path.join(path.resolve(), `dist/templates/images`);
-    if (fs.existsSync(imagesPath)) {
+    if (!fs.existsSync(imagesPath)) {
+        console.log("Creating images folder...");
         fs.mkdirSync(imagesPath);
     }
 }
+app.listen(3000, () => {
+    console.log("\n\n\nServer running...");
+    createImagesFolder();
+    console.log(path.resolve());
+});
 /**
  * Used to manage storage by deleting generated files after a set time.
  *

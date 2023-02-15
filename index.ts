@@ -390,13 +390,13 @@ async function uploadImages(): Promise<number> {
       if (data.imagesSuccessfullyUploaded) {
         // delete markdown.images;
         // batchId = data.batchId;
-        console.log("Received: ", batchId);
+        // console.log("Received: ", batchId);
+        delete markdown.images;
       }
     })
     .catch((err) => {
       console.log(err);
     });
-  delete markdown.images;
   return batchId;
 }
 
