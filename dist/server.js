@@ -473,4 +473,3 @@ function populateTemplate(template, parsedFile) {
 async function saveFile(outPutFilePath, contents) {
     fs.writeFileSync(outPutFilePath, contents);
 }
-//# sourceMappingURL=server.js.map

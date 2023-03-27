@@ -7,6 +7,7 @@ const dragArea = document.querySelector(".dragArea");
 dragArea.addEventListener("dragover", dragOver);
 dragArea.addEventListener("dragleave", dragLeave);
 dragArea.addEventListener("drop", drop);
+const progressbar = document.getElementById("progress-loader");
 const folderStructure = document.getElementsByClassName("folder-structure")[0];
 const revealFolderStructure = document.getElementsByClassName("reveal-folder-structure")[0];
 revealFolderStructure.addEventListener("mouseenter", () => {
@@ -336,6 +337,7 @@ async function sendFiles() {
     if (!markdown.about)
         delete markdown.about;
     console.log(markdown);
+    progressbar.classList.toggle("loading");
     await uploadImages();
     // console.log("Sending files: ", batchId);
     await fetch("https://sssg-rapando.onrender.com/markdown", {
@@ -354,6 +356,7 @@ async function sendFiles() {
         .then((data) => {
         console.log(data);
         if (data.filesSuccessfullyParsed === true) {
+            progressbar.classList.toggle("loading");
             addLinks();
         }
         markdown = {
@@ -368,4 +371,3 @@ async function sendFiles() {
     });
 }
 export {};
-//# sourceMappingURL=index.js.map

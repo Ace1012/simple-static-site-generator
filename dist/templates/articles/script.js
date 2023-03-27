@@ -39,4 +39,3 @@ function handleMenuToggler() {
     sideMenu.classList.toggle("open");
 }
 export {};
-//# sourceMappingURL=script.js.map

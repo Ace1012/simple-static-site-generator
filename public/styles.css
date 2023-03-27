@@ -430,6 +430,7 @@ iframe:focus {
 }
 
 .dragArea {
+  position: relative;
   background-color: lightgrey;
   cursor: pointer;
   border: 5px solid black;
@@ -444,10 +445,23 @@ iframe:focus {
   width: 50%;
   transition: all ease-in-out 150ms;
 }
-
 .dragArea span {
   font-size: clamp(1.5rem, 2.5vw, 2.5rem);
   text-align: center;
+}
+#progress-loader {
+  visibility: hidden;
+  scale: 0.5;
+  position: absolute;
+  top: 15%;
+  width: 50%;
+  transition: all ease-in-out 150ms;
+}
+
+#progress-loader.loading {
+  visibility: visible;
+  scale: 1;
+  opacity: 1 !important;
 }
 
 @media screen and (max-width: 1400px) {

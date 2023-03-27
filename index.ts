@@ -23,6 +23,10 @@ dragArea.addEventListener("dragover", dragOver);
 dragArea.addEventListener("dragleave", dragLeave);
 dragArea.addEventListener("drop", drop);
 
+const progressbar = document.getElementById(
+  "progress-loader"
+) as HTMLProgressElement;
+
 const folderStructure = document.getElementsByClassName(
   "folder-structure"
 )[0] as HTMLElement;
@@ -408,6 +412,7 @@ async function uploadImages(): Promise<number> {
 async function sendFiles() {
   if (!markdown.about) delete markdown.about;
   console.log(markdown);
+  progressbar.classList.toggle("loading");
   await uploadImages();
   // console.log("Sending files: ", batchId);
 
@@ -427,6 +432,7 @@ async function sendFiles() {
     .then((data: { filesSuccessfullyParsed: boolean }) => {
       console.log(data);
       if (data.filesSuccessfullyParsed === true) {
+        progressbar.classList.toggle("loading");
         addLinks();
       }
       markdown = {
